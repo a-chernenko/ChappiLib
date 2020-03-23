@@ -42,13 +42,13 @@ class chips_type final {
   using si57x = chappi::si57x<error_type, no_error_v>;
 
   chips_type(bool logenable = false)
-      : LTC2991{bool(false & logenable)},
-        INA219{bool(false & logenable)},
-        ADN4600{bool(false & logenable)},
-        HMC987{bool(false & logenable)},
-        TCA6424{bool(false & logenable)},
-        AD5621{bool(false & logenable)},
-        Si57x{bool(false & logenable)} {}
+      : LTC2991{bool(logenable)},
+        INA219{bool(logenable)},
+        ADN4600{bool(logenable)},
+        HMC987{bool(logenable)},
+        TCA6424{bool(logenable)},
+        AD5621{bool(logenable)},
+        Si57x{bool(logenable)} {}
   ltc2991 LTC2991;
   ina219 INA219;
   adn4600 ADN4600;
