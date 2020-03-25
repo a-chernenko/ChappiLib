@@ -26,8 +26,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include "chappi.h"
 
-using namespace chappi;
-
 using error_type = int;
 static const error_type no_error_v{error_type{0}};
 
@@ -39,23 +37,23 @@ using tca6424_type = chappi::tca6424<error_type, no_error_v>;
 using ad5621_type = chappi::ad5621<error_type, no_error_v>;
 using si57x_type = chappi::si57x<error_type, no_error_v>;
 
-static ltc2991_type LTC2991{true};
-static ina219_type INA219{true};
-static adn4600_type ADN4600{true};
-static hmc987_type HMC987{true};
-static tca6424_type TCA6424{true};
-static ad5621_type AD5621{true};
-static si57x_type Si57x{true};
+static ltc2991_type ltc2991{true};
+static ina219_type ina219{true};
+static adn4600_type adn4600{true};
+static hmc987_type hmc987{true};
+static tca6424_type tca6424{true};
+static ad5621_type ad5621{true};
+static si57x_type si57x{true};
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[]) try {
-  ltc2991_type::reg_read_fn read_LTC2991 =
+  ltc2991_type::reg_read_fn read_ltc2991 =
       []([[maybe_unused]] ltc2991_type::dev_addr_type dev_addr,
          [[maybe_unused]] ltc2991_type::addr_type addr,
          [[maybe_unused]] ltc2991_type::value_type &val) {
         // TODO: add device read
         return 0;
       };
-  ltc2991_type::reg_write_fn write_LTC2991 =
+  ltc2991_type::reg_write_fn write_ltc2991 =
       []([[maybe_unused]] ltc2991_type::dev_addr_type dev_addr,
          [[maybe_unused]] ltc2991_type::addr_type addr,
          [[maybe_unused]] ltc2991_type::value_type val) {
@@ -63,13 +61,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[]) try {
         return 0;
       };
 
-  const int addr_LTC2991{0x49};
-  LTC2991.setup_io(read_LTC2991, write_LTC2991, addr_LTC2991);
-  LTC2991.repeated_mode(true);
-  auto name = LTC2991.get_name();
-  auto temperature = LTC2991.get_temperature();
-  auto voltage_1 = LTC2991.get_voltage_1();
-  auto voltage_2 = LTC2991.get_voltage_2();
+  const int addr_ltc2991{0x49};
+  ltc2991.setup_io(read_ltc2991, write_ltc2991, addr_ltc2991);
+  ltc2991.repeated_mode(true);
+  auto name = ltc2991.get_name();
+  auto temperature = ltc2991.get_temperature();
+  auto voltage_1 = ltc2991.get_voltage_1();
+  auto voltage_2 = ltc2991.get_voltage_2();
 
   std::cout << name << '\n';
   std::cout << "temperature: " << temperature << '\n';
