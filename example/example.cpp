@@ -28,61 +28,48 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using namespace chappi;
 
-template <typename ErrorType, ErrorType ErrorValue>
-class chips_type final {
- public:
-  using error_type = ErrorType;
-  static const error_type no_error_v{ErrorValue};
-  using ltc2991 = chappi::ltc2991<error_type, no_error_v>;
-  using ina219 = chappi::ina219<error_type, no_error_v>;
-  using adn4600 = chappi::adn4600<error_type, no_error_v>;
-  using hmc987 = chappi::hmc987<error_type, no_error_v>;
-  using tca6424 = chappi::tca6424<error_type, no_error_v>;
-  using ad5621 = chappi::ad5621<error_type, no_error_v>;
-  using si57x = chappi::si57x<error_type, no_error_v>;
+using error_type = int;
+static const error_type no_error_v{error_type{0}};
 
-  chips_type(bool logenable = false)
-      : LTC2991{bool(logenable)},
-        INA219{bool(logenable)},
-        ADN4600{bool(logenable)},
-        HMC987{bool(logenable)},
-        TCA6424{bool(logenable)},
-        AD5621{bool(logenable)},
-        Si57x{bool(logenable)} {}
-  ltc2991 LTC2991;
-  ina219 INA219;
-  adn4600 ADN4600;
-  hmc987 HMC987;
-  tca6424 TCA6424;
-  ad5621 AD5621;
-  si57x Si57x;
-};
+using ltc2991_type = chappi::ltc2991<error_type, no_error_v>;
+using ina219_type = chappi::ina219<error_type, no_error_v>;
+using adn4600_type = chappi::adn4600<error_type, no_error_v>;
+using hmc987_type = chappi::hmc987<error_type, no_error_v>;
+using tca6424_type = chappi::tca6424<error_type, no_error_v>;
+using ad5621_type = chappi::ad5621<error_type, no_error_v>;
+using si57x_type = chappi::si57x<error_type, no_error_v>;
+
+static ltc2991_type LTC2991{true};
+static ina219_type INA219{true};
+static adn4600_type ADN4600{true};
+static hmc987_type HMC987{true};
+static tca6424_type TCA6424{true};
+static ad5621_type AD5621{true};
+static si57x_type Si57x{true};
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[]) try {
-  using chips_type = chips_type<int, 0>;
-  chips_type chips{true};
-  chips_type::ltc2991::reg_read_fn read_LTC2991 =
-      []([[maybe_unused]] chips_type::ltc2991::dev_addr_type dev_addr,
-         [[maybe_unused]] chips_type::ltc2991::addr_type addr,
-         [[maybe_unused]] chips_type::ltc2991::value_type &val) {
+  ltc2991_type::reg_read_fn read_LTC2991 =
+      []([[maybe_unused]] ltc2991_type::dev_addr_type dev_addr,
+         [[maybe_unused]] ltc2991_type::addr_type addr,
+         [[maybe_unused]] ltc2991_type::value_type &val) {
         // TODO: add device read
         return 0;
       };
-  chips_type::ltc2991::reg_write_fn write_LTC2991 =
-      []([[maybe_unused]] chips_type::ltc2991::dev_addr_type dev_addr,
-         [[maybe_unused]] chips_type::ltc2991::addr_type addr,
-         [[maybe_unused]] chips_type::ltc2991::value_type val) {
+  ltc2991_type::reg_write_fn write_LTC2991 =
+      []([[maybe_unused]] ltc2991_type::dev_addr_type dev_addr,
+         [[maybe_unused]] ltc2991_type::addr_type addr,
+         [[maybe_unused]] ltc2991_type::value_type val) {
         // TODO: add device write
         return 0;
       };
 
   const int addr_LTC2991{0x49};
-  chips.LTC2991.setup_io(read_LTC2991, write_LTC2991, addr_LTC2991);
-  chips.LTC2991.repeated_mode(true);
-  auto name = chips.LTC2991.get_name();
-  auto temperature = chips.LTC2991.get_temperature();
-  auto voltage_1 = chips.LTC2991.get_voltage_1();
-  auto voltage_2 = chips.LTC2991.get_voltage_2();
+  LTC2991.setup_io(read_LTC2991, write_LTC2991, addr_LTC2991);
+  LTC2991.repeated_mode(true);
+  auto name = LTC2991.get_name();
+  auto temperature = LTC2991.get_temperature();
+  auto voltage_1 = LTC2991.get_voltage_1();
+  auto voltage_2 = LTC2991.get_voltage_2();
 
   std::cout << name << '\n';
   std::cout << "temperature: " << temperature << '\n';
