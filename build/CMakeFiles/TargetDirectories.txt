@@ -1,0 +1,3 @@
+C:/chernenko/private/projects/chappi-lib/build/CMakeFiles/chappilib_example.dir
+C:/chernenko/private/projects/chappi-lib/build/CMakeFiles/edit_cache.dir
+C:/chernenko/private/projects/chappi-lib/build/CMakeFiles/rebuild_cache.dir

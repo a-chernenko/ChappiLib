@@ -25,10 +25,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "../HMC987/hmc987.h"
-#include "../ADN4600/adn4600.h"
-#include "../INA219/ina219.h"
-#include "../LTC2991/ltc2991.h"
-#include "../TCA6424/tca6424.h"
-#include "../AD5621/ad5621.h"
-#include "../Si57x/si57x.h"
+#include "chappi_hmc987.h"
+#include "chappi_adn4600.h"
+#include "chappi_ina219.h"
+#include "chappi_ltc2991.h"
+#include "chappi_tca6424.h"
+#include "chappi_ad5621.h"
+#include "chappi_si57x.h"
