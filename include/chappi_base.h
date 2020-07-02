@@ -171,7 +171,11 @@ int chips_counter<ClassType>::_counts{-1};
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
                   ValueType>::log_created;                                 \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
-                  ValueType>::log_destroyed;
+                  ValueType>::log_destroyed;                               \
+  using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
+                  ValueType>::log_set_enabled;                             \
+  using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
+                  ValueType>::log_is_enabled;
 
 template <typename ErrorType, ErrorType NoerrorValue, typename DevAddrType,
           typename AddrType, typename ValueType>
@@ -221,6 +225,8 @@ class chip_base {
   virtual std::string get_name() const noexcept = 0;
   virtual int get_counts() const noexcept = 0;
   virtual int get_num() const noexcept = 0;
+  void log_enabled(bool enabled) noexcept { log.set_enabled(enabled); }
+  bool log_is_enabled() const noexcept { return log.is_enabled(); }
   void write(addr_type addr, value_type value) const {
     static const char error_msg[]{"chip reg write error"};
     error_type error = _reg_write(_dev_addr, addr, value);
