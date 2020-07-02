@@ -41,9 +41,9 @@ union hmc987_outputs {
     Out8 = (1 << 7),
     All = 0xFF,
     None = 0
-  };
-  outs_bitmask bitmask;
-  struct __attribute__((packed)) {
+  } bitmask;
+  #pragma pack(push, 1)
+  struct {
     bool out1 : 1;
     bool out2 : 1;
     bool out3 : 1;
@@ -53,6 +53,7 @@ union hmc987_outputs {
     bool out7 : 1;
     bool out8 : 1;
   } bits;
+  #pragma pack(pop)
 };
 
 enum class hmc987_gain : uint8_t {
