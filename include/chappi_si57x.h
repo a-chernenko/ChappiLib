@@ -117,8 +117,9 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                     error);
   }
   double get_freq() const {
-    return helpers::retval_get_function<si57x, error_type, NoerrorValue, double,
-                                        &si57x::get_freq>(this);
+    double value{};
+    get_freq(value);
+    return value;
   }
   void set_fxtal(double fxtal) noexcept { _fxtal = fxtal; }
   double get_fxtal() const noexcept { return _fxtal; }

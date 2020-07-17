@@ -29,6 +29,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace chappi {
 
+enum class tca6424_port { _0, _1, _2 };
+
+struct tca6424_port_data {
+  tca6424_port_data() = default;
+  tca6424_port port{};
+  uint8_t value{};
+};
+
 namespace detail {
 struct tca6424_counter {
   chips_counter<tca6424_counter> data;
@@ -60,72 +68,40 @@ class tca6424 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
   }
-  void configure_port_0(value_type value) const { write(0x0c, value); }
-  void configure_port_0(value_type value, error_type &error) const noexcept {
+  void configure_port(const tca6424_port_data &data) const {
+    write(0x0c + static_cast<int>(data.port), data.value);
+  }
+  void configure_port(const tca6424_port_data &data, error_type &error) const
+      noexcept {
     helpers::noexcept_set_function<tca6424, error_type, NoerrorValue,
-                                   value_type, &tca6424::configure_port_0>(
-        this, value, error);
+                                   tca6424_port_data, &tca6424::configure_port>(
+        this, data, error);
   }
-  void configure_port_1(value_type value) const { write(0x0d, value); }
-  void configure_port_1(value_type value, error_type &error) const noexcept {
+  void set_port(const tca6424_port_data &data) const {
+    write(0x04 + static_cast<int>(data.port), data.value);
+  }
+  void set_port(const tca6424_port_data &data, error_type &error) const
+      noexcept {
     helpers::noexcept_set_function<tca6424, error_type, NoerrorValue,
-                                   value_type, &tca6424::configure_port_1>(
-        this, value, error);
+                                   tca6424_port_data, &tca6424::set_port>(
+        this, data, error);
   }
-  void configure_port_2(value_type value) const { write(0x0e, value); }
-  void configure_port_2(value_type value, error_type &error) const noexcept {
-    helpers::noexcept_set_function<tca6424, error_type, NoerrorValue,
-                                   value_type, &tca6424::configure_port_2>(
-        this, value, error);
+  void get_port(tca6424_port_data &data) const {
+    read(0x04 + static_cast<int>(data.port), data.value);
   }
-
-  void set_port_0(value_type value) const { write(0x04, value); }
-  void set_port_0(value_type value, error_type &error) const noexcept {
-    helpers::noexcept_set_function<tca6424, error_type, NoerrorValue,
-                                   value_type, &tca6424::set_port_0>(
-        this, value, error);
+  value_type get_port(tca6424_port port) const {
+    tca6424_port_data data{};
+    data.port = port;
+    get_port(data);
+    return data.value;
   }
-  void set_port_1(value_type value) const { write(0x05, value); }
-  void set_port_1(value_type value, error_type &error) const noexcept {
-    helpers::noexcept_set_function<tca6424, error_type, NoerrorValue,
-                                   value_type, &tca6424::set_port_1>(
-        this, value, error);
-  }
-  void set_port_2(value_type value) const { write(0x06, value); }
-  void set_port_2(value_type value, error_type &error) const noexcept {
-    helpers::noexcept_set_function<tca6424, error_type, NoerrorValue,
-                                   value_type, &tca6424::set_port_2>(
-        this, value, error);
-  }
-  void get_port_0(value_type &value) const { read(0x04, value); }
-  value_type get_port_0() const {
-    return helpers::retval_get_function<tca6424, error_type, NoerrorValue,
-                                        value_type, &tca6424::get_port_0>(this);
-  }
-  value_type get_port_0(error_type &error) const noexcept {
-    return helpers::noexcept_get_function<tca6424, error_type, NoerrorValue,
-                                          value_type, &tca6424::get_port_0>(
-        this, error);
-  }
-  void get_port_1(value_type &value) const { read(0x05, value); }
-  value_type get_port_1() const {
-    return helpers::retval_get_function<tca6424, error_type, NoerrorValue,
-                                        value_type, &tca6424::get_port_1>(this);
-  }
-  value_type get_port_1(error_type &error) const noexcept {
-    return helpers::noexcept_get_function<tca6424, error_type, NoerrorValue,
-                                          value_type, &tca6424::get_port_2>(
-        this, error);
-  }
-  void get_port_2(value_type &value) const { read(0x06, value); }
-  value_type get_port_2() const {
-    return helpers::retval_get_function<tca6424, error_type, NoerrorValue,
-                                        value_type, &tca6424::get_port_2>(this);
-  }
-  value_type get_port_2(error_type &error) const noexcept {
-    return helpers::noexcept_get_function<tca6424, error_type, NoerrorValue,
-                                          value_type, &tca6424::get_port_2>(
-        this, error);
+  value_type get_port(tca6424_port port, error_type &error) const noexcept {
+    tca6424_port_data data{};
+    data.port = port;
+    helpers::noexcept_get_function<tca6424, error_type, NoerrorValue,
+                                   tca6424_port_data, &tca6424::get_port>(
+        this, data, error);
+    return data.value;
   }
 };
 

@@ -41,6 +41,14 @@ struct ltc2991_data {
   double V8;
 };
 
+enum class ltc2991_channel { _1, _2, _3, _4, _5, _6, _7, _8 };
+
+struct ltc2991_channel_data {
+  ltc2991_channel_data() = default;
+  ltc2991_channel channel{};
+  double value{};
+};
+
 namespace detail {
 struct ltc2991_counter {
   chips_counter<ltc2991_counter> data;
@@ -86,9 +94,9 @@ class ltc2991 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     value_type value{};
     read(0x08, value);
     if (enable) {
-      value |= 0b00010000;
+      value |= value_type(0b00010000);
     } else {
-      value &= ~0b00010000;
+      value &= value_type(~0b00010000);
     }
     write(0x08, value);
   }
@@ -104,109 +112,48 @@ class ltc2991 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     value = ((msb & 0b00011111) << 8 | lsb) / 16.0;
   }
   double get_temperature() const {
-    return helpers::retval_get_function<ltc2991, error_type, NoerrorValue,
-                                        double, &ltc2991::get_temperature>(
-        this);
+    double value{};
+    get_temperature(value);
+    return value;
   }
   double get_temperature(error_type &error) const noexcept {
     return helpers::noexcept_get_function<ltc2991, error_type, NoerrorValue,
                                           double, &ltc2991::get_temperature>(
         this, error);
   }
-  void get_voltage_1(double &value) const { _get_voltage(0x0A, value); }
-  double get_voltage_1() const {
-    return helpers::retval_get_function<ltc2991, error_type, NoerrorValue,
-                                        double, &ltc2991::get_voltage_1>(this);
+  void get_voltage(ltc2991_channel_data &data) const {
+    _get_voltage(0x0A + (static_cast<int>(data.channel) << 1), data.value);
   }
-  double get_voltage_1(error_type &error) const noexcept {
-    return helpers::noexcept_get_function<ltc2991, error_type, NoerrorValue,
-                                          double, &ltc2991::get_voltage_1>(
-        this, error);
+  double get_voltage(ltc2991_channel channel) const {
+    ltc2991_channel_data data{};
+    data.channel = channel;
+    get_voltage(data);
+    return data.value;
   }
-  void get_voltage_2(double &value) const { _get_voltage(0x0C, value); }
-  double get_voltage_2() const {
-    return helpers::retval_get_function<ltc2991, error_type, NoerrorValue,
-                                        double, &ltc2991::get_voltage_2>(this);
-  }
-  double get_voltage_2(error_type &error) const noexcept {
-    return helpers::noexcept_get_function<ltc2991, error_type, NoerrorValue,
-                                          double, &ltc2991::get_voltage_2>(
-        this, error);
-  }
-  void get_voltage_3(double &value) const { _get_voltage(0x0E, value); }
-  double get_voltage_3() const {
-    return helpers::retval_get_function<ltc2991, error_type, NoerrorValue,
-                                        double, &ltc2991::get_voltage_3>(this);
-  }
-  double get_voltage_3(error_type &error) const noexcept {
-    return helpers::noexcept_get_function<ltc2991, error_type, NoerrorValue,
-                                          double, &ltc2991::get_voltage_3>(
-        this, error);
-  }
-  void get_voltage_4(double &value) const { _get_voltage(0x10, value); }
-  double get_voltage_4() const {
-    return helpers::retval_get_function<ltc2991, error_type, NoerrorValue,
-                                        double, &ltc2991::get_voltage_4>(this);
-  }
-  double get_voltage_4(error_type &error) const noexcept {
-    return helpers::noexcept_get_function<ltc2991, error_type, NoerrorValue,
-                                          double, &ltc2991::get_voltage_4>(
-        this, error);
-  }
-  void get_voltage_5(double &value) const { _get_voltage(0x12, value); }
-  double get_voltage_5() const {
-    return helpers::retval_get_function<ltc2991, error_type, NoerrorValue,
-                                        double, &ltc2991::get_voltage_5>(this);
-  }
-  double get_voltage_5(error_type &error) const noexcept {
-    return helpers::noexcept_get_function<ltc2991, error_type, NoerrorValue,
-                                          double, &ltc2991::get_voltage_5>(
-        this, error);
-  }
-  void get_voltage_6(double &value) const { _get_voltage(0x14, value); }
-  double get_voltage_6() const {
-    return helpers::retval_get_function<ltc2991, error_type, NoerrorValue,
-                                        double, &ltc2991::get_voltage_6>(this);
-  }
-  double get_voltage_6(error_type &error) const noexcept {
-    return helpers::noexcept_get_function<ltc2991, error_type, NoerrorValue,
-                                          double, &ltc2991::get_voltage_6>(
-        this, error);
-  }
-  void get_voltage_7(double &value) const { _get_voltage(0x16, value); }
-  double get_voltage_7() const {
-    return helpers::retval_get_function<ltc2991, error_type, NoerrorValue,
-                                        double, &ltc2991::get_voltage_7>(this);
-  }
-  double get_voltage_7(error_type &error) const noexcept {
-    return helpers::noexcept_get_function<ltc2991, error_type, NoerrorValue,
-                                          double, &ltc2991::get_voltage_7>(
-        this, error);
-  }
-  void get_voltage_8(double &value) const { _get_voltage(0x18, value); }
-  double get_voltage_8() const {
-    return helpers::retval_get_function<ltc2991, error_type, NoerrorValue,
-                                        double, &ltc2991::get_voltage_8>(this);
-  }
-  double get_voltage_8(error_type &error) const noexcept {
-    return helpers::noexcept_get_function<ltc2991, error_type, NoerrorValue,
-                                          double, &ltc2991::get_voltage_8>(
-        this, error);
+  double get_voltage(ltc2991_channel channel, error_type &error) const
+      noexcept {
+    ltc2991_channel_data data{};
+    data.channel = channel;
+    helpers::noexcept_get_function<ltc2991, error_type, NoerrorValue,
+                                   ltc2991_channel_data, &ltc2991::get_voltage>(
+        this, data, error);
+    return data.value;
   }
   void get_data(ltc2991_data &value) const {
     value.Tint = get_temperature();
-    value.V1 = get_voltage_1();
-    value.V2 = get_voltage_2();
-    value.V3 = get_voltage_3();
-    value.V4 = get_voltage_4();
-    value.V5 = get_voltage_5();
-    value.V6 = get_voltage_6();
-    value.V7 = get_voltage_7();
-    value.V8 = get_voltage_8();
+    value.V1 = get_voltage(ltc2991_channel::_1);
+    value.V2 = get_voltage(ltc2991_channel::_2);
+    value.V3 = get_voltage(ltc2991_channel::_3);
+    value.V4 = get_voltage(ltc2991_channel::_4);
+    value.V5 = get_voltage(ltc2991_channel::_5);
+    value.V6 = get_voltage(ltc2991_channel::_6);
+    value.V7 = get_voltage(ltc2991_channel::_7);
+    value.V8 = get_voltage(ltc2991_channel::_8);
   }
   ltc2991_data get_data() const {
-    return helpers::retval_get_function<ltc2991, error_type, NoerrorValue,
-                                        ltc2991_data, &ltc2991::get_data>(this);
+    ltc2991_data data{};
+    get_data(data);
+    return data;
   }
   ltc2991_data get_data(error_type &error) const {
     return helpers::noexcept_get_function<ltc2991, error_type, NoerrorValue,
@@ -218,7 +165,7 @@ class ltc2991 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   void _get_voltage(addr_type addr_msb, double &value) const {
     value_type val_lsb{}, val_msb{};
     read(addr_msb, val_msb);
-    read(addr_msb + 1, val_lsb);
+    read(value_type(addr_msb + 1), val_lsb);
     value = ((val_msb & 0b00111111) << 8 | val_lsb) * 0.000305180;
   }
 };

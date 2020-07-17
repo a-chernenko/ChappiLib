@@ -80,10 +80,14 @@ GetType noexcept_get_function(const ClassType *const _this,
 
 template <typename ClassType, typename ErrorType, ErrorType NoerrorValue,
           typename GetType, base_get_functor<ClassType, GetType> functor>
-GetType retval_get_function(const ClassType *const _this) {
-  GetType retval;
-  (_this->*functor)(retval);
-  return retval;
+void noexcept_get_function(const ClassType *const _this, GetType &retval,
+                           ErrorType &error) noexcept {
+  try {
+    (_this->*functor)(retval);
+    error = NoerrorValue;
+  } catch (const runtime_error<ErrorType> &e) {
+    error = e.get_error();
+  }
 }
 
 template <typename ClassType, typename SetType>

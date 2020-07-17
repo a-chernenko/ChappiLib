@@ -37,19 +37,19 @@ using tca6424_type = chappi::tca6424<error_type, no_error_v>;
 using ad5621_type = chappi::ad5621<error_type, no_error_v>;
 using si57x_type = chappi::si57x<error_type, no_error_v>;
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[]) try {
+int main(int argc, char *argv[]) try {
   ltc2991_type ltc2991{true};
   ltc2991_type::reg_read_fn read_ltc2991 =
-      []([[maybe_unused]] ltc2991_type::dev_addr_type dev_addr,
-         [[maybe_unused]] ltc2991_type::addr_type addr,
-         [[maybe_unused]] ltc2991_type::value_type &val) {
+      [](ltc2991_type::dev_addr_type dev_addr,
+         ltc2991_type::addr_type addr,
+         ltc2991_type::value_type &val) {
         // TODO: add device read
         return 0;
       };
   ltc2991_type::reg_write_fn write_ltc2991 =
-      []([[maybe_unused]] ltc2991_type::dev_addr_type dev_addr,
-         [[maybe_unused]] ltc2991_type::addr_type addr,
-         [[maybe_unused]] ltc2991_type::value_type val) {
+      [](ltc2991_type::dev_addr_type dev_addr,
+         ltc2991_type::addr_type addr,
+         ltc2991_type::value_type val) {
         // TODO: add device write
         return 0;
       };
@@ -58,8 +58,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[]) try {
   ltc2991.repeated_mode(true);
   auto name = ltc2991.get_name();
   auto temperature = ltc2991.get_temperature();
-  auto voltage_1 = ltc2991.get_voltage_1();
-  auto voltage_2 = ltc2991.get_voltage_2();
+  auto voltage_1 = ltc2991.get_voltage(chappi::ltc2991_channel::_1);
+  auto voltage_2 = ltc2991.get_voltage(chappi::ltc2991_channel::_2);
   std::cout << name << ':' << '\n';
   std::cout << "\ttemperature = " << temperature << '\n';
   std::cout << "\tvoltage_1 = " << voltage_1 << '\n';

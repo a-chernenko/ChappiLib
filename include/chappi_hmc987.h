@@ -42,7 +42,7 @@ union hmc987_outputs {
     All = 0xFF,
     None = 0
   } bitmask;
-  #pragma pack(push, 1)
+#pragma pack(push, 1)
   struct {
     bool out1 : 1;
     bool out2 : 1;
@@ -53,7 +53,7 @@ union hmc987_outputs {
     bool out7 : 1;
     bool out8 : 1;
   } bits;
-  #pragma pack(pop)
+#pragma pack(pop)
 };
 
 enum class hmc987_gain : uint8_t {
@@ -104,8 +104,9 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
 
   void read_id(value_type &id) const { read(0x00, id); }
   value_type read_id() const {
-    return helpers::retval_get_function<hmc987, error_type, NoerrorValue,
-                                        value_type, &hmc987::read_id>(this);
+    value_type id{};
+    read_id(id);
+    return id;
   }
   value_type read_id(error_type &error) const noexcept {
     return helpers::noexcept_get_function<hmc987, error_type, NoerrorValue,
@@ -124,9 +125,11 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     read(0x00, value);
     enabled = (value != 0) ? true : false;
   }
-  bool is_enabled() const {
-    return helpers::retval_get_function<hmc987, error_type, NoerrorValue, bool,
-                                        &hmc987::is_enabled>(this);
+  void is_enabled(bool &enabled) const {
+    value_type value;
+    write(0x00, 0x01);
+    read(0x00, value);
+    enabled = (value != 0) ? true : false;
   }
   bool is_enabled(error_type &error) const noexcept {
     return helpers::noexcept_get_function<hmc987, error_type, NoerrorValue,
@@ -150,9 +153,9 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     bitmask = static_cast<hmc987_outputs::outs_bitmask>(value);
   }
   hmc987_outputs::outs_bitmask state_buffers() const {
-    return helpers::retval_get_function<hmc987, error_type, NoerrorValue,
-                                        hmc987_outputs::outs_bitmask,
-                                        &hmc987::state_buffers>(this);
+    hmc987_outputs::outs_bitmask bitmask{};
+    state_buffers(bitmask);
+    return bitmask;
   }
   hmc987_outputs::outs_bitmask state_buffers(error_type &error) const noexcept {
     return helpers::noexcept_get_function<hmc987, error_type, NoerrorValue,
@@ -174,8 +177,9 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     gain = static_cast<hmc987_gain>(value);
   }
   hmc987_gain get_gain() const {
-    return helpers::retval_get_function<hmc987, error_type, NoerrorValue,
-                                        hmc987_gain, &hmc987::get_gain>(this);
+    hmc987_gain gain{};
+    get_gain(gain);
+    return gain;
   }
   hmc987_gain get_gain(error_type &error) const noexcept {
     return helpers::noexcept_get_function<hmc987, error_type, NoerrorValue,

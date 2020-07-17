@@ -86,9 +86,9 @@ class ina219 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, error);
   }
   double get_shunt_voltage() const {
-    return helpers::retval_get_function<ina219, error_type, NoerrorValue,
-                                        double, &ina219::get_shunt_voltage>(
-        this);
+    double value{};
+    get_shunt_voltage(value);
+    return value;
   }
   void get_bus_voltage(double &value) const {
     value_type retval{};
@@ -101,8 +101,9 @@ class ina219 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, error);
   }
   double get_bus_voltage() const {
-    return helpers::retval_get_function<ina219, error_type, NoerrorValue,
-                                        double, &ina219::get_bus_voltage>(this);
+    double value{};
+    get_bus_voltage(value);
+    return value;
   }
 };
 
