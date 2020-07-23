@@ -39,7 +39,7 @@
 
 # GCC
 *.d
-**.build
+**.build*
 
 # doxygen
 **/.doxygen
