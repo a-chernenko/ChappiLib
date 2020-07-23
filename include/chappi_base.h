@@ -172,6 +172,8 @@ int chips_counter<ClassType>::_counts{-1};
                   ValueType>::write;                                       \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
                   ValueType>::log;                                         \
+   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
+                  ValueType>::log_info;                                 \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
                   ValueType>::log_created;                                 \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
