@@ -218,10 +218,13 @@ class chip_base {
     name += std::to_string(get_counts());
     return name;
   }
-  void log_created(const std::string &name) const noexcept {
+  void log_info(const std::string &message) const noexcept {
+    log << '[' << get_name() << ']' << message << '\n';
+  }
+  void log_created() const noexcept {
     log << '[' << get_name() << ']' << " created\n";
   }
-  void log_destroyed(const std::string &name) const noexcept {
+  void log_destroyed() const noexcept {
     log << '[' << get_name() << ']' << " destroyed\n";
   }
 
@@ -229,7 +232,7 @@ class chip_base {
   virtual std::string get_name() const noexcept = 0;
   virtual int get_counts() const noexcept = 0;
   virtual int get_num() const noexcept = 0;
-  void log_enabled(bool enabled) noexcept { log.set_enabled(enabled); }
+  void log_set_enabled(bool enabled) noexcept { log.set_enabled(enabled); }
   bool log_is_enabled() const noexcept { return log.is_enabled(); }
   void write(addr_type addr, value_type value) const {
     static const char error_msg[]{"chip reg write error"};

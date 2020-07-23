@@ -60,9 +60,9 @@ class tca6424 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
-    log_created(get_name());
+    log_created();
   }
-  ~tca6424() noexcept { log_destroyed(get_name()); }
+  ~tca6424() noexcept { log_destroyed(); }
   int get_num() const noexcept final { return _counter.data.get_num(); }
   int get_counts() const noexcept final { return _counter.data.get_counts(); }
   std::string get_name() const noexcept final {

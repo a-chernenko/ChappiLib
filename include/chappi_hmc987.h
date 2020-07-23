@@ -88,9 +88,9 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
          reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
-    log_created(get_name());
+    log_created();
   }
-  ~hmc987() noexcept { log_destroyed(get_name()); }
+  ~hmc987() noexcept { log_destroyed(); }
   int get_num() const noexcept final { return _counter.data.get_num(); }
   int get_counts() const noexcept final { return _counter.data.get_counts(); }
   std::string get_name() const noexcept final {
@@ -125,11 +125,10 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     read(0x00, value);
     enabled = (value != 0) ? true : false;
   }
-  void is_enabled(bool &enabled) const {
-    value_type value;
-    write(0x00, 0x01);
-    read(0x00, value);
-    enabled = (value != 0) ? true : false;
+  bool is_enabled() const {
+    bool enabled{};
+    is_enabled(enabled);
+    return enabled;
   }
   bool is_enabled(error_type &error) const noexcept {
     return helpers::noexcept_get_function<hmc987, error_type, NoerrorValue,
