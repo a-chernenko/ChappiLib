@@ -409,6 +409,8 @@ enum class OUT_PD_type : register_type { active, powerdown };
 
 struct register_R44 {
   MASH_ORDER_type MASH_ORDER : 3;
+  const register_type D3 : 1;
+  const register_type D4 : 1;
   MASH_RESET_N_type MASH_RESET_N : 1;
   OUT_PD_type OUTA_PD : 1;
   OUT_PD_type OUTB_PD : 1;
@@ -558,16 +560,6 @@ inline constexpr register_type get_SYSREF_DIV(const uint16_t div) noexcept {
 
 struct register_R72 {
   register_type SYSREF_DIV : 11;
-  const register_type D1 : 1;
-  const register_type D2 : 1;
-  const register_type D3 : 1;
-  const register_type D4 : 1;
-  const register_type D5 : 1;
-  const register_type D6 : 1;
-  const register_type D7 : 1;
-  const register_type D8 : 1;
-  const register_type D9 : 1;
-  const register_type D10 : 1;
   const register_type D11 : 1;
   const register_type D12 : 1;
   const register_type D13 : 1;
@@ -745,19 +737,6 @@ struct register_R98 {
   register_type RAMP0_DLY : 1;
   const register_type D1 : 1;
   register_type RAMP0_INC_29_16 : 14;
-  const register_type D3 : 1;
-  const register_type D4 : 1;
-  const register_type D5 : 1;
-  const register_type D6 : 1;
-  const register_type D7 : 1;
-  const register_type D8 : 1;
-  const register_type D9 : 1;
-  const register_type D10 : 1;
-  const register_type D11 : 1;
-  const register_type D12 : 1;
-  const register_type D13 : 1;
-  const register_type D14 : 1;
-  const register_type D15 : 1;
 };
 
 struct register_R99 {
@@ -875,7 +854,7 @@ constexpr inline type enum_cast(register_type value) noexcept {
   return static_cast<type>(value);
 }
 
-namespace details {
+namespace detail {
 
 struct registers_map {
   register_basic<register_R0> reg_R0{};
@@ -1003,6 +982,13 @@ struct registers_map {
   register_basic<register_R111> reg_R111{};
   register_basic<register_R112> reg_R112{};
 };
+
+}  // namespace detail
+
+const int register_max_num{sizeof(detail::registers_map) /
+                           sizeof(register_type)};
+
+namespace detail {
 
 union {
   // SNAS696C-MARCH 2017 - REVISED APRIL 2019
@@ -1198,15 +1184,16 @@ union {
       .reg_R110{.reg{}},
       .reg_R111{.reg{}},
       .reg_R112{.reg{}}};  // namespace lmx2594_registers
-  const register_type array[sizeof(registers_map) / sizeof(register_type)];
-}  // namespace chappi
+  const register_type array[register_max_num];
+}
+
 const registers_map_defaults{};
 
-}  // namespace details
+}  // namespace detail
 
 union registers_map {
-  details::registers_map regs{details::registers_map_defaults.regs};
-  register_type array[sizeof(details::registers_map) / sizeof(register_type)];
+  detail::registers_map regs{detail::registers_map_defaults.regs};
+  register_type array[register_max_num];
 };
 
 #pragma pack(pop)
