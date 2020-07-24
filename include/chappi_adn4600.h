@@ -29,6 +29,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace chappi {
 
+struct adn4600_xpt_data {
+  uint16_t input;
+  uint16_t output;
+};
+
 namespace detail {
 struct adn4600_counter {
   chips_counter<adn4600_counter> data;
@@ -65,9 +70,16 @@ class adn4600 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     helpers::noexcept_void_function<adn4600, error_type, NoerrorValue,
                                     &adn4600::reset>(this, error);
   }
-  void xpt_config(value_type in, value_type out) const {
-    const value_type value = ((in << 4) & 0x70) | (out & 0x07);
+  void xpt_config(const adn4600_xpt_data &data) const {
+    const auto value =
+        value_type(((data.input << 4) & 0x70) | (data.output & 0x07));
     write(0x40, value);
+  }
+  void xpt_config(const adn4600_xpt_data &data, error_type &error) const
+      noexcept {
+    helpers::noexcept_set_function<adn4600, error_type, NoerrorValue,
+                                   adn4600_xpt_data, &adn4600::xpt_config>(
+        this, data, error);
   }
   void xpt_update() const { write(0x41, 0x01); }
   void xpt_update(error_type &error) const noexcept {
