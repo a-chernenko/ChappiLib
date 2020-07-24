@@ -1237,13 +1237,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     log_info(__func__);
     using namespace lmx2594_registers;
     registers_map.regs.reg_R0.bits.RESET = RESET_type::reset;
-    registers_map.regs.reg_R0.bits.FCAL_EN = FCAL_EN_type::calibrate_vco;
     write(0, registers_map.regs.reg_R0.reg);
     registers_map.regs.reg_R0.bits.RESET = RESET_type::normal;
+    write(0, registers_map.regs.reg_R0.reg);
     auto register_count{register_max_num};
     do {
       write(register_count, registers_map.array[register_count]);
     } while (--register_count);
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    registers_map.regs.reg_R0.bits.FCAL_EN = FCAL_EN_type::calibrate_vco;
+    write(0, registers_map.regs.reg_R0.reg);
   }
   void reset(error_type &error) const noexcept {
     helpers::noexcept_void_function<lmx2594, error_type, NoerrorValue,
