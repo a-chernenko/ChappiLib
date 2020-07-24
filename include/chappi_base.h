@@ -221,7 +221,7 @@ class chip_base {
     return name;
   }
   void log_info(const std::string &message) const noexcept {
-    log << '[' << get_name() << ']' << message << '\n';
+    log << '[' << get_name() << "] " << message << '\n';
   }
   void log_created() const noexcept {
     log << '[' << get_name() << ']' << " created\n";
