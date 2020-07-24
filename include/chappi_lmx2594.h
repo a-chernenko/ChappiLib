@@ -25,6 +25,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include <chrono>
+#include <thread>
+
 #include "chappi_base.h"
 
 namespace chappi {
@@ -983,10 +986,18 @@ struct registers_map {
   register_basic<register_R112> reg_R112{};
 };
 
+struct register_range_type {
+  int begin{};
+  int end{};
+};
+
 }  // namespace detail
 
 const int register_max_num{sizeof(detail::registers_map) /
                            sizeof(register_type)};
+const detail::register_range_type register_range_common{0, 78};
+const detail::register_range_type register_range_ramping{79, 106};
+const detail::register_range_type register_range_readback{107, 112};
 
 namespace detail {
 
