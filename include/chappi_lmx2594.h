@@ -32,6 +32,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace chappi {
 
+enum class lmx2594_output { a, b, ab };
+
+struct lmx2594_output_enable {
+  lmx2594_output output{};
+  bool enabled{};
+};
+
 namespace lmx2594_registers {
 
 #pragma pack(push, 1)
@@ -1263,8 +1270,24 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     helpers::noexcept_void_function<lmx2594, error_type, NoerrorValue,
                                     &lmx2594::reset>(this, error);
   }
-
- private:
+  void set_output_enable(const lmx2594_output_enable &data) const {
+    log_info(__func__);
+    using namespace lmx2594_registers;
+    auto enabled{(data.enabled) ? OUT_PD_type::active : OUT_PD_type::powerdown};
+    if (data.output == lmx2594_output::a) {
+      registers_map.regs.reg_R44.bits.OUTA_PD = enabled;
+    }
+    if (data.output == lmx2594_output::b) {
+      registers_map.regs.reg_R44.bits.OUTA_PD = enabled;
+    }
+    write(44, registers_map.regs.reg_R44.reg);
+  }
+  void set_output_enable(const lmx2594_output_enable &data,
+                         error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::set_output_enable>(this, data,
+                                                                error);
+  }
 };
 
 }  // namespace chappi
