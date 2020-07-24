@@ -1233,14 +1233,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
   }
-
   void reset() const {
     log_info(__func__);
-    registers_map.regs.reg_R0.bits.RESET = lmx2594_registers::RESET_type::reset;
+    using namespace lmx2594_registers;
+    registers_map.regs.reg_R0.bits.RESET = RESET_type::reset;
+    registers_map.regs.reg_R0.bits.FCAL_EN = FCAL_EN_type::calibrate_vco;
     write(0, registers_map.regs.reg_R0.reg);
-    registers_map.regs.reg_R0.bits.RESET =
-        lmx2594_registers::RESET_type::normal;
-    auto register_count{lmx2594_registers::register_max_num};
+    registers_map.regs.reg_R0.bits.RESET = RESET_type::normal;
+    auto register_count{register_max_num};
     do {
       write(register_count, registers_map.array[register_count]);
     } while (--register_count);
