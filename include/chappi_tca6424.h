@@ -60,15 +60,16 @@ class tca6424 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
-    log_created();
+    log_info(__func__);
   }
-  ~tca6424() noexcept { log_destroyed(); }
+  ~tca6424() noexcept { log_info(__func__); }
   int get_num() const noexcept final { return _counter.data.get_num(); }
   int get_counts() const noexcept final { return _counter.data.get_counts(); }
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
   }
   void configure_port(const tca6424_port_data &data) const {
+    log_info(__func__);
     write(0x0c + static_cast<int>(data.port), data.value);
   }
   void configure_port(const tca6424_port_data &data, error_type &error) const
@@ -78,6 +79,7 @@ class tca6424 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, data, error);
   }
   void set_port(const tca6424_port_data &data) const {
+    log_info(__func__);
     write(0x04 + static_cast<int>(data.port), data.value);
   }
   void set_port(const tca6424_port_data &data, error_type &error) const
@@ -87,6 +89,7 @@ class tca6424 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, data, error);
   }
   void get_port(tca6424_port_data &data) const {
+    log_info(__func__);
     read(0x04 + static_cast<int>(data.port), data.value);
   }
   value_type get_port(tca6424_port port) const {

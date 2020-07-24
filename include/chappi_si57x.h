@@ -61,30 +61,40 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
-    log_created();
+    log_info(__func__);
   }
-  ~si57x() noexcept { log_destroyed(); }
+  ~si57x() noexcept { log_info(__func__); }
   int get_num() const noexcept final { return _counter.data.get_num(); }
   int get_counts() const noexcept final { return _counter.data.get_counts(); }
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
   }
-  void reset() const { write(135, 0x80); }
+  void reset() const {
+    log_info(__func__);
+    write(135, 0x80);
+  }
   void reset(error_type &error) const noexcept {
     helpers::noexcept_void_function<si57x, error_type, NoerrorValue,
                                     &si57x::reset>(this, error);
   }
-  void freeze_dco(bool enabled) const { write(137, (enabled) ? 0x10 : 0x00); }
+  void freeze_dco(bool enabled) const {
+    log_info(__func__);
+    write(137, (enabled) ? 0x10 : 0x00);
+  }
   void freeze_dco(bool enabled, error_type &error) const noexcept {
     helpers::noexcept_set_function<si57x, error_type, NoerrorValue, bool,
                                    &si57x::freeze_dco>(this, enabled, error);
   }
-  void apply_freq() const { write(135, 0x40); }
+  void apply_freq() const {
+    log_info(__func__);
+    write(135, 0x40);
+  }
   void apply_freq(error_type &error) const noexcept {
     helpers::noexcept_void_function<si57x, error_type, NoerrorValue,
                                     &si57x::apply_freq>(this, error);
   }
   void set_freq(double value) const {
+    log_info(__func__);
     freq_regs_type freq_regs{};
     if (_make_freq_regs(value, _fxtal, freq_regs) != true) {
       auto error_msg =
@@ -102,6 +112,7 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &si57x::set_freq>(this, value, error);
   }
   void get_freq(double &value) const {
+    log_info(__func__);
     freq_regs_type freq_regs{};
     addr_type addr{start_addr};
     for (auto &reg : freq_regs) {
@@ -117,6 +128,7 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                     error);
   }
   double get_freq() const {
+    log_info(__func__);
     double value{};
     get_freq(value);
     return value;
@@ -124,6 +136,7 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   void set_fxtal(double fxtal) noexcept { _fxtal = fxtal; }
   double get_fxtal() const noexcept { return _fxtal; }
   void calib_fxtal(double freq_gen) noexcept {
+    log_info(__func__);
     freq_regs_type freq_regs{};
     addr_type addr{start_addr};
     for (auto &reg : freq_regs) {

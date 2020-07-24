@@ -57,20 +57,24 @@ class adn4600 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
-    log_created();
+    log_info(__func__);
   }
-  ~adn4600() noexcept { log_destroyed(); }
+  ~adn4600() noexcept { log_info(__func__); }
   int get_num() const noexcept final { return _counter.data.get_num(); }
   int get_counts() const noexcept final { return _counter.data.get_counts(); }
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
   }
-  void reset() const { write(0x00, 0x01); }
+  void reset() const {
+    log_info(__func__);
+    write(0x00, 0x01);
+  }
   void reset(error_type &error) const noexcept {
     helpers::noexcept_void_function<adn4600, error_type, NoerrorValue,
                                     &adn4600::reset>(this, error);
   }
   void xpt_config(const adn4600_xpt_data &data) const {
+    log_info(__func__);
     const auto value =
         value_type(((data.input << 4) & 0x70) | (data.output & 0x07));
     write(0x40, value);
@@ -81,7 +85,10 @@ class adn4600 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    adn4600_xpt_data, &adn4600::xpt_config>(
         this, data, error);
   }
-  void xpt_update() const { write(0x41, 0x01); }
+  void xpt_update() const {
+    log_info(__func__);
+    write(0x41, 0x01);
+  }
   void xpt_update(error_type &error) const noexcept {
     helpers::noexcept_void_function<adn4600, error_type, NoerrorValue,
                                     &adn4600::xpt_update>(this, error);

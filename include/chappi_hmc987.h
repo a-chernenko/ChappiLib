@@ -88,21 +88,26 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
          reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
-    log_created();
+    log_info(__func__);
   }
-  ~hmc987() noexcept { log_destroyed(); }
+  ~hmc987() noexcept { log_info(__func__); }
   int get_num() const noexcept final { return _counter.data.get_num(); }
   int get_counts() const noexcept final { return _counter.data.get_counts(); }
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
   }
-  void init() const { write(0x00, 0x00); }
+  void init() const {
+    log_info(__func__);
+    write(0x00, 0x00);
+  }
   void init(error_type &error) const noexcept {
     helpers::noexcept_void_function<hmc987, error_type, NoerrorValue,
                                     &hmc987::init>(this, error);
   }
-
-  void read_id(value_type &id) const { read(0x00, id); }
+  void read_id(value_type &id) const {
+    log_info(__func__);
+    read(0x00, id);
+  }
   value_type read_id() const {
     value_type id{};
     read_id(id);
@@ -113,13 +118,16 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                           value_type, &hmc987::read_id>(this,
                                                                         error);
   }
-
-  void chip_enable(bool enabled) const { write(0x01, (enabled) ? 0x01 : 0x00); }
+  void chip_enable(bool enabled) const {
+    log_info(__func__);
+    write(0x01, (enabled) ? 0x01 : 0x00);
+  }
   void chip_enable(bool enabled, error_type &error) const noexcept {
     helpers::noexcept_set_function<hmc987, error_type, NoerrorValue, bool,
                                    &hmc987::chip_enable>(this, enabled, error);
   }
   void is_enabled(bool &enabled) const {
+    log_info(__func__);
     value_type value;
     write(0x00, 0x01);
     read(0x00, value);
@@ -136,6 +144,7 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                      error);
   }
   void enable_buffers(hmc987_outputs::outs_bitmask bitmask) const {
+    log_info(__func__);
     write(0x02, static_cast<value_type>(bitmask));
   }
   void enable_buffers(hmc987_outputs::outs_bitmask bitmask,
@@ -146,6 +155,7 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                             error);
   }
   void state_buffers(hmc987_outputs::outs_bitmask &bitmask) const {
+    log_info(__func__);
     value_type value;
     write(0x00, 0x02);
     read(0x00, value);
@@ -162,6 +172,7 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                           &hmc987::state_buffers>(this, error);
   }
   void set_gain(hmc987_gain gain) const {
+    log_info(__func__);
     write(0x04, static_cast<value_type>(gain) & 0x07);
   }
   void set_gain(hmc987_gain gain, error_type &error) const noexcept {
@@ -170,6 +181,7 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                    error);
   }
   void get_gain(hmc987_gain &gain) const {
+    log_info(__func__);
     value_type value;
     write(0x00, 0x04);
     read(0x00, value);

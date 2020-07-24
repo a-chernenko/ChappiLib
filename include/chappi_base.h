@@ -172,12 +172,8 @@ int chips_counter<ClassType>::_counts{-1};
                   ValueType>::write;                                       \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
                   ValueType>::log;                                         \
-   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
-                  ValueType>::log_info;                                 \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
-                  ValueType>::log_created;                                 \
-  using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
-                  ValueType>::log_destroyed;                               \
+                  ValueType>::log_info;                                    \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
                   ValueType>::log_set_enabled;                             \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
@@ -222,12 +218,6 @@ class chip_base {
   }
   void log_info(const std::string &message) const noexcept {
     log << '[' << get_name() << "] " << message << '\n';
-  }
-  void log_created() const noexcept {
-    log << '[' << get_name() << ']' << " created\n";
-  }
-  void log_destroyed() const noexcept {
-    log << '[' << get_name() << ']' << " destroyed\n";
   }
 
  public:

@@ -72,15 +72,16 @@ class ltc2991 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
-    log_created();
+    log_info(__func__);
   }
-  ~ltc2991() noexcept { log_destroyed(); }
+  ~ltc2991() noexcept { log_info(__func__); }
   int get_num() const noexcept final { return _counter.data.get_num(); }
   int get_counts() const noexcept final { return _counter.data.get_counts(); }
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
   }
   void enable_all_channels() const {
+    log_info(__func__);
     value_type value{};
     read(0x01, value);
     value |= 0b11111000;
@@ -91,6 +92,7 @@ class ltc2991 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &ltc2991::enable_all_channels>(this, error);
   }
   void repeated_mode(bool enable) const {
+    log_info(__func__);
     value_type value{};
     read(0x08, value);
     if (enable) {
@@ -106,6 +108,7 @@ class ltc2991 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                             error);
   }
   void get_temperature(double &value) const {
+    log_info(__func__);
     value_type lsb{}, msb{};
     read(0x1A, msb);
     read(0x1B, lsb);
@@ -122,6 +125,7 @@ class ltc2991 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, error);
   }
   void get_voltage(ltc2991_channel_data &data) const {
+    log_info(__func__);
     _get_voltage(0x0A + (static_cast<int>(data.channel) << 1), data.value);
   }
   double get_voltage(ltc2991_channel channel) const {
@@ -140,6 +144,7 @@ class ltc2991 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return data.value;
   }
   void get_data(ltc2991_data &value) const {
+    log_info(__func__);
     value.Tint = get_temperature();
     value.V1 = get_voltage(ltc2991_channel::_1);
     value.V2 = get_voltage(ltc2991_channel::_2);

@@ -1214,7 +1214,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   static constexpr auto _chip_name = "LMX2594";
   detail::lmx2594_counter _counter;
 
-  lmx2594_registers::registers_map registers_map{};
+  mutable lmx2594_registers::registers_map registers_map{};
 
  public:
   CHIP_BASE_RESOLVE
@@ -1225,13 +1225,29 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
-    log_created();
+    log_info(__func__);
   }
-  ~lmx2594() noexcept { log_destroyed(); }
+  ~lmx2594() noexcept { log_info(__func__); }
   int get_num() const noexcept final { return _counter.data.get_num(); }
   int get_counts() const noexcept final { return _counter.data.get_counts(); }
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
+  }
+
+  void reset() const {
+    log_info(__func__);
+    registers_map.regs.reg_R0.bits.RESET = lmx2594_registers::RESET_type::reset;
+    write(0, registers_map.regs.reg_R0.reg);
+    registers_map.regs.reg_R0.bits.RESET =
+        lmx2594_registers::RESET_type::normal;
+    auto register_count{lmx2594_registers::register_max_num};
+    do {
+      write(register_count, registers_map.array[register_count]);
+    } while (--register_count);
+  }
+  void reset(error_type &error) const noexcept {
+    helpers::noexcept_void_function<lmx2594, error_type, NoerrorValue,
+                                    &lmx2594::reset>(this, error);
   }
 
  private:
