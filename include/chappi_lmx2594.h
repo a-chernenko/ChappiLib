@@ -32,12 +32,36 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace chappi {
 
-enum class lmx2594_output { a, b, ab };
+enum class lmx2594_output { outa, outb, outab };
 
 struct lmx2594_output_enable {
   lmx2594_output output{};
   bool enabled{};
 };
+
+struct lmx2594_output_power {
+  lmx2594_output output{};
+  int power{};
+};
+
+struct lmx2594_output_frequency {
+  lmx2594_output output{};
+  double frequency{};
+};
+
+namespace lmx2594_constants {
+struct vco_frequency {
+  static const auto min{7450000000u};
+};
+struct osc_frequency {
+  static const auto min{5000000u};
+};
+struct out_frequency {
+  static const auto min{10000000u};
+  static const auto max{15000000000u};
+};
+
+}  // namespace lmx2594_constants
 
 namespace lmx2594_registers {
 
@@ -993,7 +1017,7 @@ struct registers_map {
   register_basic<register_R112> reg_R112{};
 };
 
-struct register_range_type {
+struct register_range {
   int begin{};
   int end{};
 };
@@ -1002,9 +1026,9 @@ struct register_range_type {
 
 const int register_max_num{sizeof(detail::registers_map) /
                            sizeof(register_type)};
-const detail::register_range_type register_range_common{0, 78};
-const detail::register_range_type register_range_ramping{79, 106};
-const detail::register_range_type register_range_readback{107, 112};
+const detail::register_range register_range_common{0, 78};
+const detail::register_range register_range_ramping{79, 106};
+const detail::register_range register_range_readback{107, 112};
 
 namespace detail {
 
@@ -1274,10 +1298,10 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     log_info(__func__);
     using namespace lmx2594_registers;
     auto enabled{(data.enabled) ? OUT_PD_type::active : OUT_PD_type::powerdown};
-    if (data.output == lmx2594_output::a) {
+    if (data.output == lmx2594_output::outa) {
       registers_map.regs.reg_R44.bits.OUTA_PD = enabled;
     }
-    if (data.output == lmx2594_output::b) {
+    if (data.output == lmx2594_output::outb) {
       registers_map.regs.reg_R44.bits.OUTA_PD = enabled;
     }
     write(44, registers_map.regs.reg_R44.reg);
@@ -1287,6 +1311,47 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
                                    &lmx2594::set_output_enable>(this, data,
                                                                 error);
+  }
+  void set_output_power(const lmx2594_output_power &data) const {
+    log_info(__func__);
+    using namespace lmx2594_registers;
+    if (data.output == lmx2594_output::outa) {
+      registers_map.regs.reg_R44.bits.OUTA_PWR = data.power;
+      write(44, registers_map.regs.reg_R44.reg);
+    }
+    if (data.output == lmx2594_output::outb) {
+      registers_map.regs.reg_R45.bits.OUTB_PWR = data.power;
+      write(45, registers_map.regs.reg_R45.reg);
+    }
+  }
+  void set_output_power(const lmx2594_output_power &data,
+                        error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::set_output_power>(this, data,
+                                                               error);
+  }
+  void set_output_frequency(const lmx2594_output_frequency &data) const {
+    log_info(__func__);
+    using namespace lmx2594_registers;
+    if (data.output == lmx2594_output::outa) {
+      registers_map.regs.reg_R45.bits.OUTA_MUX;
+      registers_map.regs.reg_R46.bits.OUTB_MUX;
+      registers_map.regs.reg_R75.bits.CHDIV;
+      // TODO:
+    }
+    if (data.output == lmx2594_output::outb) {
+      registers_map.regs.reg_R45.bits.OUTA_MUX;
+      registers_map.regs.reg_R46.bits.OUTB_MUX;
+      registers_map.regs.reg_R75.bits.CHDIV;
+      // TODO:
+    }
+    lmx2594_constants::vco_frequency::min;
+  }
+  void set_output_frequency(const lmx2594_output_frequency &data,
+                            error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::set_output_frequency>(this, data,
+                                                                   error);
   }
 };
 
