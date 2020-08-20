@@ -32,12 +32,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace chappi {
 
-enum class lmx2594_output { outa, outb, outab };
+enum class lmx2594_output { outa, outb };
 
 struct lmx2594_output_enable {
   lmx2594_output output{};
   bool enabled{};
 };
+
+const int lmx2594_output_power_max{64};
 
 struct lmx2594_output_power {
   lmx2594_output output{};
@@ -1017,7 +1019,7 @@ struct registers_map {
   register_basic<register_R112> reg_R112{};
 };
 
-struct register_range {
+struct registers_range {
   int begin{};
   int end{};
 };
@@ -1026,9 +1028,9 @@ struct register_range {
 
 const int register_max_num{sizeof(detail::registers_map) /
                            sizeof(register_type)};
-const detail::register_range register_range_common{0, 78};
-const detail::register_range register_range_ramping{79, 106};
-const detail::register_range register_range_readback{107, 112};
+const detail::registers_range registers_range_common{0, 78};
+const detail::registers_range registers_range_ramping{79, 106};
+const detail::registers_range registers_range_readback{107, 112};
 
 namespace detail {
 
@@ -1294,7 +1296,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     helpers::noexcept_void_function<lmx2594, error_type, NoerrorValue,
                                     &lmx2594::reset>(this, error);
   }
-  void set_output_enable(const lmx2594_output_enable &data) const {
+  void set_output_enabled(const lmx2594_output_enable &data) const {
     log_info(__func__);
     using namespace lmx2594_registers;
     auto enabled{(data.enabled) ? OUT_PD_type::active : OUT_PD_type::powerdown};
@@ -1302,15 +1304,46 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
       registers_map.regs.reg_R44.bits.OUTA_PD = enabled;
     }
     if (data.output == lmx2594_output::outb) {
-      registers_map.regs.reg_R44.bits.OUTA_PD = enabled;
+      registers_map.regs.reg_R44.bits.OUTB_PD = enabled;
     }
     write(44, registers_map.regs.reg_R44.reg);
   }
-  void set_output_enable(const lmx2594_output_enable &data,
-                         error_type &error) const noexcept {
+  void set_output_enabled(const lmx2594_output_enable &data,
+                          error_type &error) const noexcept {
     helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
-                                   &lmx2594::set_output_enable>(this, data,
-                                                                error);
+                                   &lmx2594::set_output_enabled>(this, data,
+                                                                 error);
+  }
+  void is_output_enabled(lmx2594_output_enable &data) const {
+    log_info(__func__);
+    using namespace lmx2594_registers;
+    read(44, registers_map.regs.reg_R44.reg);
+    if (data.output == lmx2594_output::outa) {
+      data.enabled =
+          (registers_map.regs.reg_R44.bits.OUTA_PD == OUT_PD_type::active)
+              ? true
+              : false;
+    } else if (data.output == lmx2594_output::outb) {
+      data.enabled =
+          (registers_map.regs.reg_R44.bits.OUTB_PD == OUT_PD_type::active)
+              ? true
+              : false;
+    }
+  }
+  bool is_output_enabled(lmx2594_output output) const {
+    lmx2594_output_enable data{};
+    data.output = output;
+    is_output_enabled(data);
+    return data.enabled;
+  }
+  bool is_output_enabled(lmx2594_output output, error_type &error) const
+      noexcept {
+    lmx2594_output_enable data{};
+    data.output = output;
+    helpers::noexcept_get_function<lmx2594, error_type, NoerrorValue,
+                                   lmx2594_output, &lmx2594::is_output_enabled>(
+        this, data, error);
+    return data.enabled;
   }
   void set_output_power(const lmx2594_output_power &data) const {
     log_info(__func__);
@@ -1345,7 +1378,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
       registers_map.regs.reg_R75.bits.CHDIV;
       // TODO:
     }
-    lmx2594_constants::vco_frequency::min;
+    // TODO:
   }
   void set_output_frequency(const lmx2594_output_frequency &data,
                             error_type &error) const noexcept {
@@ -1353,6 +1386,6 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &lmx2594::set_output_frequency>(this, data,
                                                                    error);
   }
-};
+};  // namespace chappi
 
 }  // namespace chappi
