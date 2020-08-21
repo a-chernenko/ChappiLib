@@ -30,21 +30,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace chappi {
 
 struct ltc2991_data {
-  double Tint;
-  double V1;
-  double V2;
-  double V3;
-  double V4;
-  double V5;
-  double V6;
-  double V7;
-  double V8;
+  double Tint{};
+  double V1{};
+  double V2{};
+  double V3{};
+  double V4{};
+  double V5{};
+  double V6{};
+  double V7{};
+  double V8{};
 };
 
 enum class ltc2991_channel { _1, _2, _3, _4, _5, _6, _7, _8 };
 
 struct ltc2991_channel_data {
-  ltc2991_channel_data() = default;
   ltc2991_channel channel{};
   double value{};
 };

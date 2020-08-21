@@ -32,7 +32,6 @@ namespace chappi {
 enum class tca6424_port { _0, _1, _2 };
 
 struct tca6424_port_data {
-  tca6424_port_data() = default;
   tca6424_port port{};
   uint8_t value{};
 };

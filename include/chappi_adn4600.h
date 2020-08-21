@@ -30,8 +30,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace chappi {
 
 struct adn4600_xpt_data {
-  uint16_t input;
-  uint16_t output;
+  uint16_t input{};
+  uint16_t output{};
 };
 
 namespace detail {
