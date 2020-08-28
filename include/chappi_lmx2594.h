@@ -32,26 +32,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace chappi {
 
-enum class lmx2594_output { outa, outb };
-
-struct lmx2594_output_enable {
-  lmx2594_output output{};
-  bool enabled{};
-};
-
-const int lmx2594_output_power_max{64};
-
-struct lmx2594_output_power {
-  lmx2594_output output{};
-  int power{};
-};
-
-struct lmx2594_output_frequency {
-  lmx2594_output output{};
-  double frequency{};
-};
-
 namespace lmx2594_constants {
+
+const auto output_power_max{63};
+
 struct vco_frequency {
   static const auto min{7450000000u};
 };
@@ -61,6 +45,21 @@ struct osc_frequency {
 struct out_frequency {
   static const auto min{10000000u};
   static const auto max{15000000000u};
+};
+
+struct pre_divider {
+  static const auto min{1u};
+  static const auto max{128u};
+};
+
+struct divider {
+  static const auto min{1u};
+  static const auto max{255u};
+};
+
+struct n_divider {
+  static const auto min{28u};
+  static const auto max{524287u};
 };
 
 }  // namespace lmx2594_constants
@@ -150,6 +149,18 @@ struct register_R1 {
   const register_type D13 : 1;
   const register_type D14 : 1;
   const register_type D15 : 1;
+};
+
+struct register_R4 {
+  const register_type D0 : 1;
+  const register_type D1 : 1;
+  const register_type D2 : 1;
+  const register_type D3 : 1;
+  const register_type D4 : 1;
+  const register_type D5 : 1;
+  const register_type D6 : 1;
+  const register_type D7 : 1;
+  register_type ACAL_CMP_DLY : 8;
 };
 
 enum class OUT_FORCE_type : register_type { disabled, forced };
@@ -897,7 +908,7 @@ struct registers_map {
   register_basic<register_R1> reg_R1{};
   register_basic<register_common> reg_R2{};
   register_basic<register_common> reg_R3{};
-  register_basic<register_common> reg_R4{};
+  register_basic<register_R4> reg_R4{};
   register_basic<register_common> reg_R5{};
   register_basic<register_common> reg_R6{};
   register_basic<register_R7> reg_R7{};
@@ -1052,7 +1063,7 @@ union {
       .reg_R1{.bits{.CAL_CLK_DIV = CAL_CLK_DIV_type::div8, .D3 = 1, .D11 = 1}},
       .reg_R2{.bits{.D8 = 1, .D10 = 1}},
       .reg_R3{.bits{.D1 = 1, .D6 = 1, .D9 = 1, .D10 = 1}},
-      .reg_R4{.bits{.D0 = 1, .D1 = 1, .D6 = 1}},
+      .reg_R4{.bits{.D0 = 1, .D1 = 1, .D6 = 1, .ACAL_CMP_DLY = 10}},
       .reg_R5{.bits{.D3 = 1, .D6 = 1, .D7 = 1}},
       .reg_R6{.bits{.D1 = 1, .D11 = 1, .D14 = 1, .D15 = 1}},
       .reg_R7{.bits{.D1 = 1,
@@ -1113,7 +1124,9 @@ union {
       .reg_R34{.reg{}},
       .reg_R35{.bits{.D2 = 1}},
       .reg_R36{.bits{.PLL_N_15_0 = 100}},
-      .reg_R37{.bits{.D2 = 1, .MASH_SEED_EN = MASH_SEED_EN_type::disabled}},
+      .reg_R37{.bits{.D2 = 1,
+                     .PFD_DLY_SEL = 2,
+                     .MASH_SEED_EN = MASH_SEED_EN_type::disabled}},
       .reg_R38{.reg{}},
       .reg_R39{.reg{}},
 
@@ -1227,11 +1240,9 @@ union {
 
       .reg_R110{.reg{}},
       .reg_R111{.reg{}},
-      .reg_R112{.reg{}}};  // namespace lmx2594_registers
+      .reg_R112{.reg{}}};
   const register_type array[register_max_num];
-}
-
-const registers_map_defaults{};
+} const registers_map_defaults{};
 
 }  // namespace detail
 
@@ -1240,9 +1251,77 @@ union registers_map {
   register_type array[register_max_num];
 };
 
+class registers_update {
+  bool _changed[lmx2594_registers::register_max_num]{};
+  int _count{};
+
+ public:
+  registers_update() = default;
+
+  auto is_valid(int register_num) const noexcept {
+    if (register_num < 0 ||
+        register_num > lmx2594_registers::register_max_num) {
+      return false;
+    }
+    return true;
+  }
+  auto is_changed(int register_num) const noexcept {
+    if (!is_valid(register_num)) {
+      return false;
+    }
+    return _changed[register_num];
+  }
+  auto is_changed() const noexcept { return (_count > 0) ? true : false; }
+  template <typename Arg = int, typename... Args>
+  auto set_changed(Arg register_num, Args... other_registers) noexcept {
+    if (!is_valid(register_num)) {
+      return false;
+    }
+    _changed[register_num] = true;
+    ++_count;
+    return set_changed(other_registers...);
+  }
+  auto set_changed() noexcept { return true; }
+  auto clear_changed(int register_num) noexcept {
+    if (!is_valid(register_num) || _count <= 0) {
+      return false;
+    }
+    _changed[register_num] = false;
+    --_count;
+    return true;
+  }
+};
+
 #pragma pack(pop)
 
 }  // namespace lmx2594_registers
+
+enum class lmx2594_output { outa, outb };
+
+struct lmx2594_output_enable {
+  lmx2594_output output{};
+  bool enabled{};
+};
+
+struct lmx2594_output_power {
+  lmx2594_output output{};
+  int power{};
+};
+
+using lmx2594_output_a_mux = lmx2594_registers::OUTA_MUX_type;
+using lmx2594_output_b_mux = lmx2594_registers::OUTB_MUX_type;
+using lmx2594_channel_divider = lmx2594_registers::CHDIV_type;
+using lmx2594_charge_pump_gain = lmx2594_registers::CPG_type;
+using lmx2594_doubler = lmx2594_registers::OSC_2X_type;
+using lmx2594_pre_divider = lmx2594_registers::register_type;
+using lmx2594_multiplier = lmx2594_registers::MULT_type;
+using lmx2594_divider = lmx2594_registers::register_type;
+using lmx2594_n_divider = lmx2594_registers::register_type;
+using lmx2594_fractional_numerator = lmx2594_registers::register_type;
+using lmx2594_fractional_denomerator = lmx2594_registers::register_type;
+using lmx2594_lock_detect = lmx2594_registers::LD_TYPE_type;
+using lmx2594_lock_detect_mux = lmx2594_registers::MUXOUT_LD_SEL_type;
+using lmx2594_mash_order = lmx2594_registers::MASH_ORDER_type;
 
 namespace detail {
 struct lmx2594_counter {
@@ -1258,7 +1337,8 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   static constexpr auto _chip_name = "LMX2594";
   detail::lmx2594_counter _counter;
 
-  mutable lmx2594_registers::registers_map registers_map{};
+  mutable lmx2594_registers::registers_map _registers_map{};
+  mutable lmx2594_registers::registers_update _registers_update{};
 
  public:
   CHIP_BASE_RESOLVE
@@ -1277,55 +1357,94 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
   }
+  void update_changes() const {
+    log_info(__func__);
+    using namespace lmx2594_registers;
+    for (int registers_count{register_max_num}; registers_count > 0;
+         --registers_count) {
+      if (_registers_update.is_changed(registers_count)) {
+        write(registers_count, _registers_map.array[registers_count]);
+        _registers_update.clear_changed(registers_count);
+      }
+    }
+  }
   void reset() const {
     log_info(__func__);
     using namespace lmx2594_registers;
-    registers_map.regs.reg_R0.bits.RESET = RESET_type::reset;
-    write(0, registers_map.regs.reg_R0.reg);
-    registers_map.regs.reg_R0.bits.RESET = RESET_type::normal;
-    write(0, registers_map.regs.reg_R0.reg);
+    _registers_map.regs.reg_R0.bits.RESET = RESET_type::reset;
+    write(0, _registers_map.regs.reg_R0.reg);
+    _registers_map.regs.reg_R0.bits.RESET = RESET_type::normal;
+    write(0, _registers_map.regs.reg_R0.reg);
     auto register_count{register_max_num};
     do {
-      write(register_count, registers_map.array[register_count]);
+      write(register_count, _registers_map.array[register_count]);
     } while (--register_count);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    registers_map.regs.reg_R0.bits.FCAL_EN = FCAL_EN_type::calibrate_vco;
-    write(0, registers_map.regs.reg_R0.reg);
+    _registers_map.regs.reg_R0.bits.FCAL_EN = FCAL_EN_type::calibrate_vco;
+    write(0, _registers_map.regs.reg_R0.reg);
   }
   void reset(error_type &error) const noexcept {
     helpers::noexcept_void_function<lmx2594, error_type, NoerrorValue,
                                     &lmx2594::reset>(this, error);
   }
-  void set_output_enabled(const lmx2594_output_enable &data) const {
+  void chip_enable(bool enabled) const {
     log_info(__func__);
     using namespace lmx2594_registers;
-    auto enabled{(data.enabled) ? OUT_PD_type::active : OUT_PD_type::powerdown};
-    if (data.output == lmx2594_output::outa) {
-      registers_map.regs.reg_R44.bits.OUTA_PD = enabled;
-    }
-    if (data.output == lmx2594_output::outb) {
-      registers_map.regs.reg_R44.bits.OUTB_PD = enabled;
-    }
-    write(44, registers_map.regs.reg_R44.reg);
+    _registers_map.regs.reg_R0.bits.POWERDOWN =
+        (enabled) ? POWERDOWN_type::normal : POWERDOWN_type::powerdown;
+    write(0, _registers_map.regs.reg_R0.reg);
   }
-  void set_output_enabled(const lmx2594_output_enable &data,
-                          error_type &error) const noexcept {
+  void chip_enable(bool enabled, error_type &error) const noexcept {
     helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
-                                   &lmx2594::set_output_enabled>(this, data,
-                                                                 error);
+                                   &lmx2594::chip_enable>(this, enabled, error);
+  }
+  void is_enabled(bool &enabled) const {
+    log_info(__func__);
+    using namespace lmx2594_registers;
+    read(0, _registers_map.regs.reg_R0.reg);
+    enabled =
+        (_registers_map.regs.reg_R0.bits.POWERDOWN == POWERDOWN_type::normal)
+            ? true
+            : false;
+  }
+  bool is_enabled() const {
+    bool enabled{};
+    is_enabled(enabled);
+    return enabled;
+  }
+  bool is_enabled(error_type &error) const noexcept {
+    return helpers::noexcept_get_function<lmx2594, error_type, NoerrorValue,
+                                          bool, &lmx2594::is_enabled>(this,
+                                                                      error);
+  }
+  void set_output_enabled(const lmx2594_output_enable &data) const noexcept {
+    log_info(__func__);
+    _set_output_enabled(data);
+    _registers_update.set_changed(44);
+  }
+  void update_output_enabled(const lmx2594_output_enable &data) const {
+    log_info(__func__);
+    _set_output_enabled(data);
+    _update_registers(44);
+  }
+  void update_output_enabled(const lmx2594_output_enable &data,
+                             error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_output_enabled>(this, data,
+                                                                    error);
   }
   void is_output_enabled(lmx2594_output_enable &data) const {
     log_info(__func__);
     using namespace lmx2594_registers;
-    read(44, registers_map.regs.reg_R44.reg);
+    read(44, _registers_map.regs.reg_R44.reg);
     if (data.output == lmx2594_output::outa) {
       data.enabled =
-          (registers_map.regs.reg_R44.bits.OUTA_PD == OUT_PD_type::active)
+          (_registers_map.regs.reg_R44.bits.OUTA_PD == OUT_PD_type::active)
               ? true
               : false;
     } else if (data.output == lmx2594_output::outb) {
       data.enabled =
-          (registers_map.regs.reg_R44.bits.OUTB_PD == OUT_PD_type::active)
+          (_registers_map.regs.reg_R44.bits.OUTB_PD == OUT_PD_type::active)
               ? true
               : false;
     }
@@ -1345,47 +1464,581 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, data, error);
     return data.enabled;
   }
-  void set_output_power(const lmx2594_output_power &data) const {
+  void set_output_power(const lmx2594_output_power &data) const noexcept {
     log_info(__func__);
-    using namespace lmx2594_registers;
-    if (data.output == lmx2594_output::outa) {
-      registers_map.regs.reg_R44.bits.OUTA_PWR = data.power;
-      write(44, registers_map.regs.reg_R44.reg);
-    }
-    if (data.output == lmx2594_output::outb) {
-      registers_map.regs.reg_R45.bits.OUTB_PWR = data.power;
-      write(45, registers_map.regs.reg_R45.reg);
-    }
+    _set_output_power(data);
+    _registers_update.set_changed(45, 44);
   }
-  void set_output_power(const lmx2594_output_power &data,
-                        error_type &error) const noexcept {
+  void update_output_power(const lmx2594_output_power &data) const {
+    log_info(__func__);
+    _set_output_power(data);
+    _update_registers(45, 44);
+  }
+  void update_output_power(const lmx2594_output_power &data,
+                           error_type &error) const noexcept {
     helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
-                                   &lmx2594::set_output_power>(this, data,
+                                   &lmx2594::update_output_power>(this, data,
+                                                                  error);
+  }
+  void set_output_mux(const lmx2594_output_a_mux &value) const noexcept {
+    log_info(__func__);
+    _set_output_mux(value);
+    _registers_update.set_changed(45);
+  }
+  void update_output_mux(const lmx2594_output_a_mux &value) const {
+    log_info(__func__);
+    _set_output_mux(value);
+    _update_registers(45);
+  }
+  void update_output_mux(const lmx2594_output_a_mux &value,
+                         error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_output_mux>(this, value,
+                                                                error);
+  }
+  void set_output_mux(const lmx2594_output_b_mux &value) const noexcept {
+    log_info(__func__);
+    _set_output_mux(value);
+    _registers_update.set_changed(46);
+  }
+  void update_output_mux(const lmx2594_output_b_mux &value) const {
+    log_info(__func__);
+    _set_output_mux(value);
+    _update_registers(46);
+  }
+  void update_output_mux(const lmx2594_output_b_mux &value,
+                         error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_output_mux>(this, value,
+                                                                error);
+  }
+  void set_channel_divider(const lmx2594_channel_divider &value) const
+      noexcept {
+    log_info(__func__);
+    _set_channel_divider(value);
+    _registers_update.set_changed(75, 31);
+  }
+  void update_channel_divider(const lmx2594_channel_divider &value) const {
+    log_info(__func__);
+    _set_channel_divider(value);
+    _update_registers(75, 31);
+  }
+  void update_channel_divider(const lmx2594_channel_divider &value,
+                              error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_channel_divider>(
+        this, value, error);
+  }
+  void set_charge_pump_gain(const lmx2594_charge_pump_gain &value) const
+      noexcept {
+    log_info(__func__);
+    _set_charge_pump_gain(value);
+    _registers_update.set_changed(14);
+  }
+  void update_charge_pump_gain(const lmx2594_charge_pump_gain &value) const {
+    log_info(__func__);
+    _set_charge_pump_gain(value);
+    _update_registers(14);
+  }
+  void update_charge_pump_gain(const lmx2594_charge_pump_gain &value,
+                               error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_charge_pump_gain>(
+        this, value, error);
+  }
+  void set_doubler(const lmx2594_doubler &value) const noexcept {
+    log_info(__func__);
+    _set_doubler(value);
+    _registers_update.set_changed(9);
+  }
+  void update_doubler(const lmx2594_doubler &value) const {
+    log_info(__func__);
+    _set_doubler(value);
+    _update_registers(9);
+  }
+  void update_doubler(const lmx2594_doubler &value, error_type &error) const
+      noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_doubler>(this, value,
+                                                             error);
+  }
+  void set_pre_divider(const lmx2594_pre_divider &value) const {
+    log_info(__func__);
+    _set_pre_divider(value);
+    _registers_update.set_changed(12);
+  }
+  void update_pre_divider(const lmx2594_pre_divider &value) const {
+    log_info(__func__);
+    _set_pre_divider(value);
+    _update_registers(12);
+  }
+  void update_pre_divider(const lmx2594_pre_divider &value,
+                          error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_pre_divider>(this, value,
+                                                                 error);
+  }
+  void set_multiplier(const lmx2594_multiplier &value) const noexcept {
+    log_info(__func__);
+    _set_multiplier(value);
+    _registers_update.set_changed(10);
+  }
+  void update_multiplier(const lmx2594_multiplier &value) const {
+    log_info(__func__);
+    _set_multiplier(value);
+    _update_registers(10);
+  }
+  void update_multiplier(const lmx2594_multiplier &value,
+                         error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_multiplier>(this, value,
+                                                                error);
+  }
+  void set_divider(const lmx2594_divider &value) const {
+    log_info(__func__);
+    _set_divider(value);
+    _registers_update.set_changed(11);
+  }
+  void update_divider(const lmx2594_divider &value) const {
+    log_info(__func__);
+    _set_divider(value);
+    _update_registers(11);
+  }
+  void update_divider(const lmx2594_divider &value, error_type &error) const
+      noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_divider>(this, value,
+                                                             error);
+  }
+  void set_n_divider(const lmx2594_n_divider &value) const {
+    log_info(__func__);
+    _set_n_divider(value);
+    _registers_update.set_changed(36, 34);
+  }
+  void update_n_divider(const lmx2594_n_divider &value) const {
+    log_info(__func__);
+    _set_n_divider(value);
+    _update_registers(36, 34);
+  }
+  void update_n_divider(const lmx2594_n_divider &value, error_type &error) const
+      noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_n_divider>(this, value,
                                                                error);
   }
-  void set_output_frequency(const lmx2594_output_frequency &data) const {
+  void set_fractional_numerator(const lmx2594_fractional_numerator &value) const
+      noexcept {
+    log_info(__func__);
+    _set_fractional_numerator(value);
+    _registers_update.set_changed(43, 42);
+  }
+  void update_fractional_numerator(
+      const lmx2594_fractional_numerator &value) const {
+    log_info(__func__);
+    _set_fractional_numerator(value);
+    _update_registers(43, 42);
+  }
+  void update_fractional_numerator(const lmx2594_fractional_numerator &value,
+                                   error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_fractional_numerator>(
+        this, value, error);
+  }
+  void set_fractional_denomerator(
+      const lmx2594_fractional_denomerator &value) const noexcept {
+    log_info(__func__);
+    _set_fractional_denomerator(value);
+    _registers_update.set_changed(39, 38);
+  }
+  void update_fractional_denomerator(
+      const lmx2594_fractional_denomerator &value) const {
+    log_info(__func__);
+    _set_fractional_denomerator(value);
+    _update_registers(39, 38);
+  }
+  void update_fractional_denomerator(
+      const lmx2594_fractional_denomerator &value, error_type &error) const
+      noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_fractional_denomerator>(
+        this, value, error);
+  }
+  void vco_calibrate() const {
     log_info(__func__);
     using namespace lmx2594_registers;
+    _registers_map.regs.reg_R0.bits.FCAL_EN = FCAL_EN_type::calibrate_vco;
+    write(0, _registers_map.regs.reg_R0.reg);
+  }
+  void vco_calibrate(error_type &error) const noexcept {
+    helpers::noexcept_void_function<lmx2594, error_type, NoerrorValue,
+                                    &lmx2594::vco_calibrate>(this, error);
+  }
+  void set_lock_detect(const lmx2594_lock_detect &value) const noexcept {
+    log_info(__func__);
+    _set_lock_detect(value);
+    _registers_update.set_changed(59);
+  }
+  void update_lock_detect(const lmx2594_lock_detect &value) const {
+    log_info(__func__);
+    _set_lock_detect(value);
+    _update_registers(59);
+  }
+  void update_lock_detect(const lmx2594_lock_detect &value,
+                          error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_lock_detect>(this, value,
+                                                                 error);
+  }
+  void set_lock_detect_mux(const lmx2594_lock_detect_mux &value) const
+      noexcept {
+    log_info(__func__);
+    _set_lock_detect_mux(value);
+    _registers_update.set_changed(0);
+  }
+  void update_lock_detect_mux(const lmx2594_lock_detect_mux &value) const {
+    log_info(__func__);
+    _set_lock_detect_mux(value);
+    _update_registers(0);
+  }
+  void update_lock_detect_mux(const lmx2594_lock_detect_mux &value,
+                              error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_lock_detect_mux>(
+        this, value, error);
+  }
+  void set_phase_detector_delay(unsigned long long vco_frequency) const {
+    log_info(__func__);
+    _set_phase_detector_delay(vco_frequency);
+    _registers_update.set_changed(37);
+  }
+  void update_phase_detector_delay(unsigned long long vco_frequency) const {
+    log_info(__func__);
+    _set_phase_detector_delay(vco_frequency);
+    _update_registers(37);
+  }
+  void update_phase_detector_delay(unsigned long long vco_frequency,
+                                   error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_phase_detector_delay>(
+        this, vco_frequency, error);
+  }
+  void set_vco_calibration_divider(unsigned long long osc_frequency) const
+      noexcept {
+    log_info(__func__);
+    _set_vco_calibration_divider(osc_frequency);
+    _registers_update.set_changed(1);
+  }
+  void update_vco_calibration_divider(unsigned long long osc_frequency) const {
+    log_info(__func__);
+    _set_vco_calibration_divider(osc_frequency);
+    _update_registers(1);
+  }
+  void update_vco_calibration_divider(unsigned long long osc_frequency,
+                                      error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_vco_calibration_divider>(
+        this, osc_frequency, error);
+  }
+  void set_mash_order(const lmx2594_mash_order &value) const noexcept {
+    log_info(__func__);
+    _set_mash_order(value);
+    _registers_update.set_changed(44);
+  }
+  void update_mash_order(const lmx2594_mash_order &value) const {
+    log_info(__func__);
+    _set_mash_order(value);
+    _update_registers(44);
+  }
+  void update_mash_order(const lmx2594_mash_order &value,
+                         error_type &error) const noexcept {
+    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
+                                   &lmx2594::update_mash_order>(this, value,
+                                                                error);
+  }
+  auto get_n_divider_min(unsigned long long vco_frequency) const {
+    using namespace lmx2594_registers;
+    if (vco_frequency < lmx2594_constants::vco_frequency::min ||
+        vco_frequency > get_vco_frequency_max()) {
+      throw std::invalid_argument(
+          "lmx2594::get_n_divider_min: invalid argument");
+    }
+    int n_divider_min{};
+    switch (_registers_map.regs.reg_R44.bits.MASH_ORDER) {
+      case MASH_ORDER_type::integer:
+        if (vco_frequency > 12500000000u) {
+          n_divider_min = 32;
+        } else {
+          n_divider_min = 28;
+        }
+        break;
+      case MASH_ORDER_type::frac1:
+        if (vco_frequency > 12500000000u) {
+          n_divider_min = 36;
+        } else if (vco_frequency > 10000000000u) {
+          n_divider_min = 32;
+        } else {
+          n_divider_min = 28;
+        }
+        break;
+      case MASH_ORDER_type::frac2:
+        if (vco_frequency > 10000000000u) {
+          n_divider_min = 36;
+        } else {
+          n_divider_min = 32;
+        }
+        break;
+      case MASH_ORDER_type::frac3:
+        if (vco_frequency > 10000000000u) {
+          n_divider_min = 40;
+        } else {
+          n_divider_min = 36;
+        }
+        break;
+      case MASH_ORDER_type::frac4:
+        if (vco_frequency > 10000000000u) {
+          n_divider_min = 48;
+        } else {
+          n_divider_min = 40;
+        }
+        break;
+      default:
+        throw std::invalid_argument(
+            "lmx2594::get_n_divider_min: invalid argument");
+        break;
+    }
+    return n_divider_min;
+  }
+
+  auto get_phase_detector_delay() const noexcept {
+    double pd_frequency{};
+    // TODO:
+    return pd_frequency;
+  }
+
+  auto get_osc_frequency_max() const noexcept {
+    using namespace lmx2594_registers;
+    if (_registers_map.regs.reg_R9.bits.OSC_2X == OSC_2X_type::disabled) {
+      return 200000000u;
+    }
+    return 14000000000u;
+  }
+
+  auto get_pd_frequency_max() const noexcept {
+    using namespace lmx2594_registers;
+    if (_registers_map.regs.reg_R44.bits.MASH_ORDER ==
+        MASH_ORDER_type::integer) {
+      return 400000000u;
+    } else if (_registers_map.regs.reg_R44.bits.MASH_ORDER ==
+               MASH_ORDER_type::frac4) {
+      return 240000000u;
+    }
+    return 300000000u;
+  }
+
+  auto get_pd_frequency_min() const noexcept {
+    using namespace lmx2594_registers;
+    if (_registers_map.regs.reg_R44.bits.MASH_ORDER ==
+        MASH_ORDER_type::integer) {
+      return 125u;
+    }
+    return 5000u;
+  }
+
+  auto get_vco_frequency_max() const noexcept {
+    using namespace lmx2594_registers;
+    if (_registers_map.regs.reg_R75.bits.CHDIV >= CHDIV_type::div8) {
+      return 11500000000;
+    }
+    return 15000000000;
+  }
+
+  // FIXME: TEST ZONE >>>>
+  void temp() const {
+    log_info(__func__);
+    using namespace lmx2594_registers;
+
+    _registers_map.regs.reg_R0.bits.FCAL_LPFD_ADJ =
+        FCAL_LPFD_ADJ_type::upper_10_MHz;
+    _registers_map.regs.reg_R0.bits.FCAL_HPFD_ADJ =
+        FCAL_HPFD_ADJ_type::range_150_200_MHz;
+    write(0, _registers_map.regs.reg_R0.reg);
+
+    _registers_map.regs.reg_R4.bits.ACAL_CMP_DLY = 10;
+    write(4, _registers_map.regs.reg_R4.reg);
+
+    _registers_map.regs.reg_R20.bits.VCO_SEL = VCO_SEL_type::vco1;
+    write(20, _registers_map.regs.reg_R20.reg);
+  }
+  // FIXME: TEST ZONE <<<<
+
+ private:
+  template <typename Arg = int, typename... Args>
+  void _update_registers(Arg register_num, Args... other_registers) const {
+    write(register_num, _registers_map.array[register_num]);
+    _update_registers(other_registers...);
+  }
+  void _update_registers() const {}
+  void _set_output_enabled(const lmx2594_output_enable &data) const noexcept {
+    using namespace lmx2594_registers;
+    auto enabled{(data.enabled) ? OUT_PD_type::active : OUT_PD_type::powerdown};
     if (data.output == lmx2594_output::outa) {
-      registers_map.regs.reg_R45.bits.OUTA_MUX;
-      registers_map.regs.reg_R46.bits.OUTB_MUX;
-      registers_map.regs.reg_R75.bits.CHDIV;
-      // TODO:
+      _registers_map.regs.reg_R44.bits.OUTA_PD = enabled;
     }
     if (data.output == lmx2594_output::outb) {
-      registers_map.regs.reg_R45.bits.OUTA_MUX;
-      registers_map.regs.reg_R46.bits.OUTB_MUX;
-      registers_map.regs.reg_R75.bits.CHDIV;
-      // TODO:
+      _registers_map.regs.reg_R44.bits.OUTB_PD = enabled;
     }
-    // TODO:
   }
-  void set_output_frequency(const lmx2594_output_frequency &data,
-                            error_type &error) const noexcept {
-    helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
-                                   &lmx2594::set_output_frequency>(this, data,
-                                                                   error);
+  void _set_output_power(const lmx2594_output_power &data) const noexcept {
+    using namespace lmx2594_registers;
+    if (data.output == lmx2594_output::outa) {
+      _registers_map.regs.reg_R44.bits.OUTA_PWR = data.power;
+    }
+    if (data.output == lmx2594_output::outb) {
+      _registers_map.regs.reg_R45.bits.OUTB_PWR = data.power;
+    }
   }
-};  // namespace chappi
+  void _set_output_mux(const lmx2594_output_a_mux &value) const noexcept {
+    using namespace lmx2594_registers;
+    _registers_map.regs.reg_R45.bits.OUTA_MUX = value;
+  }
+  void _set_output_mux(const lmx2594_output_b_mux &value) const noexcept {
+    using namespace lmx2594_registers;
+    _registers_map.regs.reg_R46.bits.OUTB_MUX = value;
+  }
+  void _set_channel_divider(const lmx2594_channel_divider &value) const
+      noexcept {
+    using namespace lmx2594_registers;
+    _registers_map.regs.reg_R75.bits.CHDIV = value;
+    if (_registers_map.regs.reg_R75.bits.CHDIV > CHDIV_type::div2) {
+      _registers_map.regs.reg_R31.bits.SEG1_EN =
+          SEG1_EN_type::driver_buffer_enabled;
+    } else {
+      _registers_map.regs.reg_R31.bits.SEG1_EN = SEG1_EN_type::disabled;
+    }
+  }
+  void _set_charge_pump_gain(const lmx2594_charge_pump_gain &value) const
+      noexcept {
+    using namespace lmx2594_registers;
+    _registers_map.regs.reg_R14.bits.CPG = value;
+  }
+  void _set_doubler(const lmx2594_doubler &value) const noexcept {
+    using namespace lmx2594_registers;
+    _registers_map.regs.reg_R9.bits.OSC_2X = value;
+  }
+  void _set_pre_divider(const lmx2594_pre_divider &value) const {
+    using namespace lmx2594_registers;
+    using namespace lmx2594_constants;
+    if (value < pre_divider::min || value > pre_divider::max) {
+      throw std::invalid_argument("lmx2594::set_pre_divider: invalid argument");
+    }
+    _registers_map.regs.reg_R12.bits.PLL_R_PRE = value;
+  }
+  void _set_multiplier(const lmx2594_multiplier &value) const noexcept {
+    using namespace lmx2594_registers;
+    _registers_map.regs.reg_R10.bits.MULT = value;
+  }
+  void _set_divider(const lmx2594_divider &value) const {
+    using namespace lmx2594_registers;
+    using namespace lmx2594_constants;
+    if (value < divider::min || value > divider::max) {
+      throw std::invalid_argument("lmx2594::set_divider: invalid argument");
+    }
+    _registers_map.regs.reg_R11.bits.PLL_R = value;
+  }
+  void _set_n_divider(const lmx2594_n_divider &value) const noexcept {
+    using namespace lmx2594_registers;
+    _registers_map.regs.reg_R36.bits.PLL_N_15_0 = value & 0xFFFF;
+    _registers_map.regs.reg_R34.bits.PLL_N_18_16 = (value >> 8) & 0x07;
+  }
+  void _set_fractional_numerator(
+      const lmx2594_fractional_numerator &value) const noexcept {
+    using namespace lmx2594_registers;
+    _registers_map.regs.reg_R43.bits.PLL_NUM_15_0 = value & 0xFFFF;
+    _registers_map.regs.reg_R42.bits.PLL_NUM_31_16 = (value >> 8) & 0xFFFF;
+  }
+  void _set_fractional_denomerator(
+      const lmx2594_fractional_denomerator &value) const noexcept {
+    using namespace lmx2594_registers;
+    _registers_map.regs.reg_R39.bits.PLL_DEN_15_0 = value & 0xFFFF;
+    _registers_map.regs.reg_R38.bits.PLL_DEN_31_16 = (value >> 8) & 0xFFFF;
+  }
+  void _set_lock_detect(const lmx2594_lock_detect &value) const noexcept {
+    using namespace lmx2594_registers;
+    _registers_map.regs.reg_R59.bits.LD_TYPE = value;
+  }
+  void _set_lock_detect_mux(const lmx2594_lock_detect_mux &value) const
+      noexcept {
+    using namespace lmx2594_registers;
+    _registers_map.regs.reg_R0.bits.MUXOUT_LD_SEL =
+        MUXOUT_LD_SEL_type::lock_detect;
+  }
+  void _set_phase_detector_delay(unsigned long long vco_frequency) const {
+    using namespace lmx2594_registers;
+    if (vco_frequency < lmx2594_constants::vco_frequency::min ||
+        vco_frequency > get_vco_frequency_max()) {
+      throw std::invalid_argument(
+          "lmx2594::set_phase_detector_delay: invalid argument");
+    }
+    switch (_registers_map.regs.reg_R44.bits.MASH_ORDER) {
+      case MASH_ORDER_type::integer:
+        if (vco_frequency > 12500000000u) {
+          _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 2;
+        } else {
+          _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 1;
+        }
+        break;
+      case MASH_ORDER_type::frac1:
+        if (vco_frequency > 12500000000u) {
+          _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 3;
+        } else if (vco_frequency > 10000000000u) {
+          _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 2;
+        } else {
+          _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 1;
+        }
+        break;
+      case MASH_ORDER_type::frac2:
+        if (vco_frequency > 10000000000u) {
+          _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 3;
+        } else {
+          _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 2;
+        }
+        break;
+      case MASH_ORDER_type::frac3:
+        if (vco_frequency > 10000000000u) {
+          _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 4;
+        } else {
+          _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 3;
+        }
+        break;
+      case MASH_ORDER_type::frac4:
+        if (vco_frequency > 10000000000u) {
+          _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 6;
+        } else {
+          _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 5;
+        }
+        break;
+      default:
+        throw std::invalid_argument(
+            "lmx2594::set_phase_detector_delay: invalid argument");
+    }
+  }
+  void _set_vco_calibration_divider(unsigned long long osc_frequency) const
+      noexcept {
+    using namespace lmx2594_registers;
+    CAL_CLK_DIV_type divider{CAL_CLK_DIV_type::div1};
+    if (osc_frequency > 800000000u) {
+      divider = CAL_CLK_DIV_type::div8;
+    } else if (osc_frequency > 400000000u) {
+      divider = CAL_CLK_DIV_type::div4;
+    } else if (osc_frequency > 200000000u) {
+      divider = CAL_CLK_DIV_type::div2;
+    }
+    _registers_map.regs.reg_R1.bits.CAL_CLK_DIV = CAL_CLK_DIV_type::div1;
+  }
+  void _set_mash_order(const lmx2594_mash_order &value) const noexcept {
+    using namespace lmx2594_registers;
+    _registers_map.regs.reg_R44.bits.MASH_ORDER = value;
+  }
+};
 
 }  // namespace chappi
