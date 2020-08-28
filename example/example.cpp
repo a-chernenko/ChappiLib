@@ -36,19 +36,18 @@ using hmc987_type = chappi::hmc987<error_type, no_error_v>;
 using tca6424_type = chappi::tca6424<error_type, no_error_v>;
 using ad5621_type = chappi::ad5621<error_type, no_error_v>;
 using si57x_type = chappi::si57x<error_type, no_error_v>;
+using lmx2594_type = chappi::lmx2594<error_type, no_error_v>;
 
 int main(int argc, char *argv[]) try {
   ltc2991_type ltc2991{true};
   ltc2991_type::reg_read_fn read_ltc2991 =
-      [](ltc2991_type::dev_addr_type dev_addr,
-         ltc2991_type::addr_type addr,
+      [](ltc2991_type::dev_addr_type dev_addr, ltc2991_type::addr_type addr,
          ltc2991_type::value_type &val) {
         // TODO: add device read
         return 0;
       };
   ltc2991_type::reg_write_fn write_ltc2991 =
-      [](ltc2991_type::dev_addr_type dev_addr,
-         ltc2991_type::addr_type addr,
+      [](ltc2991_type::dev_addr_type dev_addr, ltc2991_type::addr_type addr,
          ltc2991_type::value_type val) {
         // TODO: add device write
         return 0;
@@ -71,6 +70,7 @@ int main(int argc, char *argv[]) try {
   tca6424_type tca6424{true};
   ad5621_type ad5621{true};
   si57x_type si57x{true};
+  lmx2594_type lmx2594{true};
 
   return 0;
 } catch (...) {
