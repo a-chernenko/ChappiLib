@@ -25,7 +25,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include <algorithm>
 #include <chrono>
+#include <forward_list>
 #include <thread>
 
 #include "chappi_base.h"
@@ -1252,8 +1254,7 @@ union registers_map {
 };
 
 class registers_update {
-  bool _changed[lmx2594_registers::register_max_num]{};
-  int _count{};
+  std::forward_list<int> _changed_registers{};
 
  public:
   registers_update() = default;
@@ -1269,25 +1270,28 @@ class registers_update {
     if (!is_valid(register_num)) {
       return false;
     }
-    return _changed[register_num];
+    auto result = std::find(_changed_registers.cbegin(),
+                            _changed_registers.cend(), register_num);
+    if (result != _changed_registers.cend()) {
+      return true;
+    }
+    return false;
   }
-  auto is_changed() const noexcept { return (_count > 0) ? true : false; }
+  auto is_changed() const noexcept { return (!_changed_registers.empty()); }
   template <typename Arg = int, typename... Args>
   auto set_changed(Arg register_num, Args... other_registers) noexcept {
     if (!is_valid(register_num)) {
       return false;
     }
-    _changed[register_num] = true;
-    ++_count;
+    _changed_registers.push_front(register_num);
     return set_changed(other_registers...);
   }
   auto set_changed() noexcept { return true; }
   auto clear_changed(int register_num) noexcept {
-    if (!is_valid(register_num) || _count <= 0) {
+    if (!is_valid(register_num)) {
       return false;
     }
-    _changed[register_num] = false;
-    --_count;
+    _changed_registers.remove(register_num);
     return true;
   }
 };
@@ -1814,7 +1818,6 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     // TODO:
     return pd_frequency;
   }
-
   auto get_osc_frequency_max() const noexcept {
     using namespace lmx2594_registers;
     if (_registers_map.regs.reg_R9.bits.OSC_2X == OSC_2X_type::disabled) {
@@ -1822,7 +1825,6 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     }
     return 14000000000u;
   }
-
   auto get_pd_frequency_max() const noexcept {
     using namespace lmx2594_registers;
     if (_registers_map.regs.reg_R44.bits.MASH_ORDER ==
@@ -1834,7 +1836,6 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     }
     return 300000000u;
   }
-
   auto get_pd_frequency_min() const noexcept {
     using namespace lmx2594_registers;
     if (_registers_map.regs.reg_R44.bits.MASH_ORDER ==
@@ -1843,7 +1844,6 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     }
     return 5000u;
   }
-
   auto get_vco_frequency_max() const noexcept {
     using namespace lmx2594_registers;
     if (_registers_map.regs.reg_R75.bits.CHDIV >= CHDIV_type::div8) {
