@@ -26,6 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <forward_list>
 #include <thread>
@@ -39,14 +40,14 @@ namespace lmx2594_constants {
 const auto output_power_max{63};
 
 struct vco_frequency {
-  static const auto min{7450000000u};
+  static const auto min{7450000000ull};
 };
 struct osc_frequency {
   static const auto min{5000000u};
 };
 struct out_frequency {
   static const auto min{10000000u};
-  static const auto max{15000000000u};
+  static const auto max{15000000000ull};
 };
 
 struct pre_divider {
@@ -64,6 +65,9 @@ struct n_divider {
   static const auto max{524287u};
 };
 
+static constexpr std::array<unsigned int, 18> channel_divider_array{
+    2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 72, 96, 128, 192, 256, 384, 512, 768};
+
 }  // namespace lmx2594_constants
 
 namespace lmx2594_registers {
@@ -71,6 +75,11 @@ namespace lmx2594_registers {
 #pragma pack(push, 1)
 
 using register_type = uint16_t;
+
+template <typename T>
+inline register_type register_to_integer(T value) noexcept {
+  return static_cast<std::underlying_type_t<T>>(value);
+}
 
 template <typename register_bits_type>
 union register_basic {
@@ -1312,6 +1321,12 @@ struct lmx2594_output_power {
   int power{};
 };
 
+struct lmx2594_output_frequency {
+  lmx2594_output output{};
+  double reference{};
+  double frequency{};
+};
+
 using lmx2594_output_a_mux = lmx2594_registers::OUTA_MUX_type;
 using lmx2594_output_b_mux = lmx2594_registers::OUTB_MUX_type;
 using lmx2594_channel_divider = lmx2594_registers::CHDIV_type;
@@ -1379,7 +1394,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     write(0, _registers_map.regs.reg_R0.reg);
     _registers_map.regs.reg_R0.bits.RESET = RESET_type::normal;
     write(0, _registers_map.regs.reg_R0.reg);
-    auto register_count{register_max_num};
+    auto register_count{register_max_num - 1};
     do {
       write(register_count, _registers_map.array[register_count]);
     } while (--register_count);
@@ -1759,6 +1774,42 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &lmx2594::update_mash_order>(this, value,
                                                                 error);
   }
+  void set_high_pd_frequency_calibration(unsigned long pd_frequency) const
+      noexcept {
+    log_info(__func__);
+    _set_high_pd_frequency_calibration(pd_frequency);
+    _registers_update.set_changed(0);
+  }
+  void update_high_pd_frequency_calibration(unsigned long pd_frequency) const {
+    log_info(__func__);
+    _set_high_pd_frequency_calibration(pd_frequency);
+    _update_registers(0);
+  }
+  void update_high_pd_frequency_calibration(unsigned long pd_frequency,
+                                            error_type &error) const noexcept {
+    helpers::noexcept_set_function<
+        lmx2594, error_type, NoerrorValue,
+        &lmx2594::update_high_pd_frequency_calibration>(this, pd_frequency,
+                                                        error);
+  }
+  void set_low_pd_frequency_calibration(unsigned long pd_frequency) const
+      noexcept {
+    log_info(__func__);
+    _set_low_pd_frequency_calibration(pd_frequency);
+    _registers_update.set_changed(0);
+  }
+  void update_low_pd_frequency_calibration(unsigned long pd_frequency) const {
+    log_info(__func__);
+    _set_low_pd_frequency_calibration(pd_frequency);
+    _update_registers(0);
+  }
+  void update_low_pd_frequency_calibration(unsigned long pd_frequency,
+                                           error_type &error) const noexcept {
+    helpers::noexcept_set_function<
+        lmx2594, error_type, NoerrorValue,
+        &lmx2594::update_low_pd_frequency_calibration>(this, pd_frequency,
+                                                       error);
+  }
   auto get_n_divider_min(unsigned long long vco_frequency) const {
     using namespace lmx2594_registers;
     if (vco_frequency < lmx2594_constants::vco_frequency::min ||
@@ -1769,37 +1820,37 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     int n_divider_min{};
     switch (_registers_map.regs.reg_R44.bits.MASH_ORDER) {
       case MASH_ORDER_type::integer:
-        if (vco_frequency > 12500000000u) {
+        if (vco_frequency > 12500000000ull) {
           n_divider_min = 32;
         } else {
           n_divider_min = 28;
         }
         break;
       case MASH_ORDER_type::frac1:
-        if (vco_frequency > 12500000000u) {
+        if (vco_frequency > 12500000000ull) {
           n_divider_min = 36;
-        } else if (vco_frequency > 10000000000u) {
+        } else if (vco_frequency > 10000000000ull) {
           n_divider_min = 32;
         } else {
           n_divider_min = 28;
         }
         break;
       case MASH_ORDER_type::frac2:
-        if (vco_frequency > 10000000000u) {
+        if (vco_frequency > 10000000000ull) {
           n_divider_min = 36;
         } else {
           n_divider_min = 32;
         }
         break;
       case MASH_ORDER_type::frac3:
-        if (vco_frequency > 10000000000u) {
+        if (vco_frequency > 10000000000ull) {
           n_divider_min = 40;
         } else {
           n_divider_min = 36;
         }
         break;
       case MASH_ORDER_type::frac4:
-        if (vco_frequency > 10000000000u) {
+        if (vco_frequency > 10000000000ull) {
           n_divider_min = 48;
         } else {
           n_divider_min = 40;
@@ -1821,9 +1872,9 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   auto get_osc_frequency_max() const noexcept {
     using namespace lmx2594_registers;
     if (_registers_map.regs.reg_R9.bits.OSC_2X == OSC_2X_type::disabled) {
-      return 200000000u;
+      return 200000000ull;
     }
-    return 14000000000u;
+    return 14000000000ull;
   }
   auto get_pd_frequency_max() const noexcept {
     using namespace lmx2594_registers;
@@ -1847,21 +1898,35 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   auto get_vco_frequency_max() const noexcept {
     using namespace lmx2594_registers;
     if (_registers_map.regs.reg_R75.bits.CHDIV >= CHDIV_type::div8) {
-      return 11500000000;
+      return 11500000000ull;
     }
-    return 15000000000;
+    return 15000000000ull;
   }
-
+  auto get_channel_divider(unsigned long long out_frequency,
+                           unsigned long long pd_frequency) const {
+    std::underlying_type_t<lmx2594_channel_divider> chdiv{};
+    for (const auto channel_divider :
+         lmx2594_constants::channel_divider_array) {
+      const auto vco_frequency{out_frequency * channel_divider};
+      if (vco_frequency < lmx2594_constants::vco_frequency::min) {
+        ++chdiv;
+        continue;
+      }
+      if (vco_frequency > get_vco_frequency_max()) {
+        throw std::out_of_range(
+            "lmx2594::find_channel_divider: vco_frequency out of range");
+      }
+      if (vco_frequency / pd_frequency >= get_n_divider_min(vco_frequency)) {
+        break;
+      }
+      ++chdiv;
+    }
+    return lmx2594_channel_divider(chdiv);
+  }
   // FIXME: TEST ZONE >>>>
   void temp() const {
     log_info(__func__);
     using namespace lmx2594_registers;
-
-    _registers_map.regs.reg_R0.bits.FCAL_LPFD_ADJ =
-        FCAL_LPFD_ADJ_type::upper_10_MHz;
-    _registers_map.regs.reg_R0.bits.FCAL_HPFD_ADJ =
-        FCAL_HPFD_ADJ_type::range_150_200_MHz;
-    write(0, _registers_map.regs.reg_R0.reg);
 
     _registers_map.regs.reg_R4.bits.ACAL_CMP_DLY = 10;
     write(4, _registers_map.regs.reg_R4.reg);
@@ -1870,6 +1935,78 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     write(20, _registers_map.regs.reg_R20.reg);
   }
   // FIXME: TEST ZONE <<<<
+
+  void set_frequency(const lmx2594_output_frequency &data) const {
+    log_info(__func__);
+    using namespace lmx2594_registers;
+    const auto out_frequency{static_cast<unsigned long long>(data.frequency)};
+    const auto osc_frequency{static_cast<unsigned long long>(data.reference)};
+    if (out_frequency > lmx2594_constants::out_frequency::max ||
+        out_frequency < lmx2594_constants::out_frequency::min) {
+      throw std::invalid_argument("lmx2594::set_frequency: invalid argument");
+    }
+    if (osc_frequency < lmx2594_constants::osc_frequency::min ||
+        osc_frequency > get_osc_frequency_max()) {
+      throw std::invalid_argument("lmx2594::set_frequency: invalid argument");
+    }
+    _registers_map.regs.reg_R44.bits.MASH_ORDER = MASH_ORDER_type::integer;
+    double osc_frequency_ratio =
+        register_to_integer(_registers_map.regs.reg_R10.bits.MULT) *
+        (register_to_integer(_registers_map.regs.reg_R9.bits.OSC_2X) + 1) /
+        double(_registers_map.regs.reg_R11.bits.PLL_R) /
+        double(_registers_map.regs.reg_R12.bits.PLL_R_PRE);
+    double pd_frequency = out_frequency * osc_frequency_ratio;
+    if (pd_frequency > get_pd_frequency_max() ||
+        pd_frequency < get_pd_frequency_min()) {
+      throw std::out_of_range(
+          "lmx2594::set_frequency: pd_frequency out of range");
+    }
+    const auto channel_divider =
+        get_channel_divider(out_frequency, pd_frequency);
+    set_channel_divider(channel_divider);
+    const unsigned int channel_divider_value =
+        lmx2594_constants::channel_divider_array
+            [std::underlying_type_t<lmx2594_channel_divider>(channel_divider)];
+    const unsigned long long vco_frequency =
+        out_frequency * channel_divider_value;
+    if (vco_frequency < lmx2594_constants::vco_frequency::min ||
+        vco_frequency > get_vco_frequency_max()) {
+      throw std::out_of_range(
+          "lmx2594::set_frequency: vco_frequency out of range");
+    }
+    const auto divider = double(vco_frequency) / pd_frequency;
+    const auto n_divider = (unsigned int)(divider);
+    if (n_divider < get_n_divider_min(vco_frequency)) {
+      throw std::out_of_range(
+          "lmx2594::set_frequency: n_divider out of range ");
+    }
+    const auto num_den_min = 1. / pd_frequency;
+    if (((divider - n_divider) < num_den_min)) {
+      _registers_map.regs.reg_R44.bits.MASH_ORDER = MASH_ORDER_type::integer;
+    } /*else {
+      if (!find_num_den(nnd - n, &num, &den)) {
+        num = uint32_t((nnd - n) * den);
+        WRITE_LOG("Set_F_2594: Не удалось выполнить find_num_den" +
+                  std::to_string(nnd))
+      }
+    }
+    */
+      // TODO:
+    set_high_pd_frequency_calibration(pd_frequency);
+    set_low_pd_frequency_calibration(pd_frequency);
+    log_info(std::string(32, '-'));
+    log_info("out_frequency (Hz) = " + std::to_string(out_frequency));
+    log_info("osc_frequency (Hz) = " + std::to_string(osc_frequency));
+    log_info("vco_frequency (Hz) = " + std::to_string(vco_frequency));
+    log_info("pd_frequency (Hz) = " + std::to_string(pd_frequency));
+    log_info("channel_divider = " + std::to_string(channel_divider_value));
+    log_info("n_divider = " + std::to_string(n_divider));
+    log_info(std::string(32, '-'));
+  }
+  auto is_integer_mode() const noexcept {
+    // TODO: add
+    return true;
+  }
 
  private:
   template <typename Arg = int, typename... Args>
@@ -2038,6 +2175,40 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   void _set_mash_order(const lmx2594_mash_order &value) const noexcept {
     using namespace lmx2594_registers;
     _registers_map.regs.reg_R44.bits.MASH_ORDER = value;
+  }
+  void _set_high_pd_frequency_calibration(unsigned long pd_frequency) const
+      noexcept {
+    using namespace lmx2594_registers;
+    if (pd_frequency > 200000000ul) {
+      _registers_map.regs.reg_R0.bits.FCAL_HPFD_ADJ =
+          FCAL_HPFD_ADJ_type::upper_200_MHz;
+    } else if (pd_frequency > 150000000ul) {
+      _registers_map.regs.reg_R0.bits.FCAL_HPFD_ADJ =
+          FCAL_HPFD_ADJ_type::range_150_200_MHz;
+    } else if (pd_frequency > 100000000) {
+      _registers_map.regs.reg_R0.bits.FCAL_HPFD_ADJ =
+          FCAL_HPFD_ADJ_type::range_100_150_MHz;
+    } else {
+      _registers_map.regs.reg_R0.bits.FCAL_HPFD_ADJ =
+          FCAL_HPFD_ADJ_type::lower_100_MHz;
+    }
+  }
+  void _set_low_pd_frequency_calibration(unsigned long pd_frequency) const
+      noexcept {
+    using namespace lmx2594_registers;
+    if (pd_frequency < 2500000ul) {
+      _registers_map.regs.reg_R0.bits.FCAL_LPFD_ADJ =
+          FCAL_LPFD_ADJ_type::lower_2p5_MHz;
+    } else if (pd_frequency < 5000000ul) {
+      _registers_map.regs.reg_R0.bits.FCAL_LPFD_ADJ =
+          FCAL_LPFD_ADJ_type::range_2p5_5_MHz;
+    } else if (pd_frequency < 10000000ul) {
+      _registers_map.regs.reg_R0.bits.FCAL_LPFD_ADJ =
+          FCAL_LPFD_ADJ_type::range_5_10_MHz;
+    } else {
+      _registers_map.regs.reg_R0.bits.FCAL_LPFD_ADJ =
+          FCAL_LPFD_ADJ_type::upper_10_MHz;
+    }
   }
 };
 
