@@ -26,7 +26,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include <algorithm>
-#include <array>
 #include <chrono>
 #include <forward_list>
 #include <thread>
@@ -65,7 +64,13 @@ struct n_divider {
   static const auto max{524287u};
 };
 
-static constexpr std::array<unsigned int, 18> channel_divider_array{
+struct fraction {
+  struct denominator {
+    static const auto max{UINT32_MAX};
+  };
+};
+
+const uint32_t actual_channel_divider_array[]{
     2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 72, 96, 128, 192, 256, 384, 512, 768};
 
 }  // namespace lmx2594_constants
@@ -1725,34 +1730,33 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &lmx2594::update_lock_detect_mux>(
         this, value, error);
   }
-  void set_phase_detector_delay(unsigned long long vco_frequency) const {
+  void set_phase_detector_delay(uint64_t vco_frequency) const {
     log_info(__func__);
     _set_phase_detector_delay(vco_frequency);
     _registers_update.set_changed(37);
   }
-  void update_phase_detector_delay(unsigned long long vco_frequency) const {
+  void update_phase_detector_delay(uint64_t vco_frequency) const {
     log_info(__func__);
     _set_phase_detector_delay(vco_frequency);
     _update_registers(37);
   }
-  void update_phase_detector_delay(unsigned long long vco_frequency,
+  void update_phase_detector_delay(uint64_t vco_frequency,
                                    error_type &error) const noexcept {
     helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
                                    &lmx2594::update_phase_detector_delay>(
         this, vco_frequency, error);
   }
-  void set_vco_calibration_divider(unsigned long long osc_frequency) const
-      noexcept {
+  void set_vco_calibration_divider(uint64_t osc_frequency) const noexcept {
     log_info(__func__);
     _set_vco_calibration_divider(osc_frequency);
     _registers_update.set_changed(1);
   }
-  void update_vco_calibration_divider(unsigned long long osc_frequency) const {
+  void update_vco_calibration_divider(uint64_t osc_frequency) const {
     log_info(__func__);
     _set_vco_calibration_divider(osc_frequency);
     _update_registers(1);
   }
-  void update_vco_calibration_divider(unsigned long long osc_frequency,
+  void update_vco_calibration_divider(uint64_t osc_frequency,
                                       error_type &error) const noexcept {
     helpers::noexcept_set_function<lmx2594, error_type, NoerrorValue,
                                    &lmx2594::update_vco_calibration_divider>(
@@ -1774,50 +1778,48 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &lmx2594::update_mash_order>(this, value,
                                                                 error);
   }
-  void set_high_pd_frequency_calibration(unsigned long pd_frequency) const
-      noexcept {
+  void set_high_pd_frequency_calibration(uint32_t pd_frequency) const noexcept {
     log_info(__func__);
     _set_high_pd_frequency_calibration(pd_frequency);
     _registers_update.set_changed(0);
   }
-  void update_high_pd_frequency_calibration(unsigned long pd_frequency) const {
+  void update_high_pd_frequency_calibration(uint32_t pd_frequency) const {
     log_info(__func__);
     _set_high_pd_frequency_calibration(pd_frequency);
     _update_registers(0);
   }
-  void update_high_pd_frequency_calibration(unsigned long pd_frequency,
+  void update_high_pd_frequency_calibration(uint32_t pd_frequency,
                                             error_type &error) const noexcept {
     helpers::noexcept_set_function<
         lmx2594, error_type, NoerrorValue,
         &lmx2594::update_high_pd_frequency_calibration>(this, pd_frequency,
                                                         error);
   }
-  void set_low_pd_frequency_calibration(unsigned long pd_frequency) const
-      noexcept {
+  void set_low_pd_frequency_calibration(uint32_t pd_frequency) const noexcept {
     log_info(__func__);
     _set_low_pd_frequency_calibration(pd_frequency);
     _registers_update.set_changed(0);
   }
-  void update_low_pd_frequency_calibration(unsigned long pd_frequency) const {
+  void update_low_pd_frequency_calibration(uint32_t pd_frequency) const {
     log_info(__func__);
     _set_low_pd_frequency_calibration(pd_frequency);
     _update_registers(0);
   }
-  void update_low_pd_frequency_calibration(unsigned long pd_frequency,
+  void update_low_pd_frequency_calibration(uint32_t pd_frequency,
                                            error_type &error) const noexcept {
     helpers::noexcept_set_function<
         lmx2594, error_type, NoerrorValue,
         &lmx2594::update_low_pd_frequency_calibration>(this, pd_frequency,
                                                        error);
   }
-  auto get_n_divider_min(unsigned long long vco_frequency) const {
+  auto get_n_divider_min(uint64_t vco_frequency) const {
     using namespace lmx2594_registers;
     if (vco_frequency < lmx2594_constants::vco_frequency::min ||
         vco_frequency > get_vco_frequency_max()) {
       throw std::invalid_argument(
           "lmx2594::get_n_divider_min: invalid argument");
     }
-    int n_divider_min{};
+    uint32_t n_divider_min{};
     switch (_registers_map.regs.reg_R44.bits.MASH_ORDER) {
       case MASH_ORDER_type::integer:
         if (vco_frequency > 12500000000ull) {
@@ -1863,7 +1865,11 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     }
     return n_divider_min;
   }
-
+  static auto get_actual_channel_divider(
+      lmx2594_channel_divider register_value) noexcept {
+    return lmx2594_constants::actual_channel_divider_array
+        [std::underlying_type_t<lmx2594_channel_divider>(register_value)];
+  }
   auto get_phase_detector_delay() const noexcept {
     double pd_frequency{};
     // TODO:
@@ -1902,11 +1908,11 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     }
     return 15000000000ull;
   }
-  auto get_channel_divider(unsigned long long out_frequency,
-                           unsigned long long pd_frequency) const {
+  auto get_channel_divider(uint64_t out_frequency,
+                           uint64_t pd_frequency) const {
     std::underlying_type_t<lmx2594_channel_divider> chdiv{};
     for (const auto channel_divider :
-         lmx2594_constants::channel_divider_array) {
+         lmx2594_constants::actual_channel_divider_array) {
       const auto vco_frequency{out_frequency * channel_divider};
       if (vco_frequency < lmx2594_constants::vco_frequency::min) {
         ++chdiv;
@@ -1923,24 +1929,48 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     }
     return lmx2594_channel_divider(chdiv);
   }
-  // FIXME: TEST ZONE >>>>
-  void temp() const {
-    log_info(__func__);
-    using namespace lmx2594_registers;
-
-    _registers_map.regs.reg_R4.bits.ACAL_CMP_DLY = 10;
-    write(4, _registers_map.regs.reg_R4.reg);
-
-    _registers_map.regs.reg_R20.bits.VCO_SEL = VCO_SEL_type::vco1;
-    write(20, _registers_map.regs.reg_R20.reg);
+  void set_vco_assist(uint64_t vco_frequency) const {
+    // TODO:
   }
-  // FIXME: TEST ZONE <<<<
-
+  auto find_num_denom(double alfa, uint32_t &numerator,
+                      uint32_t &denomerator) const {
+    if (alfa < 1. && alfa > 0.) {
+      uint64_t numerator_prev{};
+      uint64_t denomerator_prev{1};
+      uint64_t numerator_last{1};
+      uint64_t denomerator_last{uint64_t(1. / alfa)};
+      double epsilon{1 / alfa - denomerator_last};
+      const double zero{1e-11};
+      while (epsilon > zero) {
+        const auto a = uint64_t(1 / epsilon);
+        const auto denomerator_tmp = denomerator_last * a + denomerator_prev;
+        if (denomerator_tmp >= lmx2594_constants::fraction::denominator::max) {
+          break;
+        }
+        const auto numerator_tmp = numerator_last * a + numerator_prev;
+        epsilon = 1 / epsilon - a;
+        numerator_prev = numerator_last;
+        numerator_last = numerator_tmp;
+        denomerator_prev = denomerator_last;
+        denomerator_last = denomerator_tmp;
+      }
+      numerator = uint32_t(numerator_last);
+      denomerator = uint32_t(denomerator_last);
+      return true;
+    }
+    return false;
+  }
   void set_frequency(const lmx2594_output_frequency &data) const {
     log_info(__func__);
     using namespace lmx2594_registers;
-    const auto out_frequency{static_cast<unsigned long long>(data.frequency)};
-    const auto osc_frequency{static_cast<unsigned long long>(data.reference)};
+    const auto out_frequency{static_cast<uint64_t>(data.frequency + 0.5)};
+    const auto osc_frequency{static_cast<uint64_t>(data.reference + 0.5)};
+    set_doubler(lmx2594_doubler::disabled);
+    set_pre_divider(1);
+    set_multiplier(lmx2594_multiplier::bypass);
+    set_divider(2);
+    set_mash_order(lmx2594_mash_order::frac3);
+    set_vco_calibration_divider(data.reference);
     if (out_frequency > lmx2594_constants::out_frequency::max ||
         out_frequency < lmx2594_constants::out_frequency::min) {
       throw std::invalid_argument("lmx2594::set_frequency: invalid argument");
@@ -1949,13 +1979,12 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         osc_frequency > get_osc_frequency_max()) {
       throw std::invalid_argument("lmx2594::set_frequency: invalid argument");
     }
-    _registers_map.regs.reg_R44.bits.MASH_ORDER = MASH_ORDER_type::integer;
     double osc_frequency_ratio =
         register_to_integer(_registers_map.regs.reg_R10.bits.MULT) *
         (register_to_integer(_registers_map.regs.reg_R9.bits.OSC_2X) + 1) /
         double(_registers_map.regs.reg_R11.bits.PLL_R) /
         double(_registers_map.regs.reg_R12.bits.PLL_R_PRE);
-    double pd_frequency = out_frequency * osc_frequency_ratio;
+    double pd_frequency = osc_frequency * osc_frequency_ratio;
     if (pd_frequency > get_pd_frequency_max() ||
         pd_frequency < get_pd_frequency_min()) {
       throw std::out_of_range(
@@ -1964,48 +1993,73 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     const auto channel_divider =
         get_channel_divider(out_frequency, pd_frequency);
     set_channel_divider(channel_divider);
-    const unsigned int channel_divider_value =
-        lmx2594_constants::channel_divider_array
-            [std::underlying_type_t<lmx2594_channel_divider>(channel_divider)];
-    const unsigned long long vco_frequency =
-        out_frequency * channel_divider_value;
+    const uint32_t actual_channel_divider =
+        get_actual_channel_divider(channel_divider);
+    const uint64_t vco_frequency = out_frequency * actual_channel_divider;
     if (vco_frequency < lmx2594_constants::vco_frequency::min ||
         vco_frequency > get_vco_frequency_max()) {
       throw std::out_of_range(
           "lmx2594::set_frequency: vco_frequency out of range");
     }
-    const auto divider = double(vco_frequency) / pd_frequency;
-    const auto n_divider = (unsigned int)(divider);
+    const double divider = double(vco_frequency) / pd_frequency;
+    const uint32_t n_divider = uint32_t(divider);
+    uint32_t numerator{};
+    uint32_t denomerator{lmx2594_constants::fraction::denominator::max};
     if (n_divider < get_n_divider_min(vco_frequency)) {
       throw std::out_of_range(
           "lmx2594::set_frequency: n_divider out of range ");
     }
-    const auto num_den_min = 1. / pd_frequency;
-    if (((divider - n_divider) < num_den_min)) {
-      _registers_map.regs.reg_R44.bits.MASH_ORDER = MASH_ORDER_type::integer;
-    } /*else {
-      if (!find_num_den(nnd - n, &num, &den)) {
-        num = uint32_t((nnd - n) * den);
-        WRITE_LOG("Set_F_2594: Не удалось выполнить find_num_den" +
-                  std::to_string(nnd))
-      }
+    const double num_denom_min = 1. / pd_frequency;
+    if (((divider - n_divider) < num_denom_min)) {
+      set_mash_order(lmx2594_mash_order::integer);
+      numerator = 0;
+    } else if (!find_num_denom(divider - n_divider, numerator, denomerator)) {
+      numerator = uint32_t((divider - n_divider) * denomerator);
+      throw std::out_of_range(
+          "lmx2594::set_frequency: find_num_denom out of range ");
     }
-    */
-      // TODO:
+    numerator *= lmx2594_constants::fraction::denominator::max / denomerator;
+    denomerator = denomerator *
+                  (lmx2594_constants::fraction::denominator::max / denomerator);
+    auto actual_out_frequency = uint64_t(
+        0.5 + pd_frequency *
+                  (n_divider + double(numerator) / double(denomerator)) /
+                  double(actual_channel_divider));
+    set_n_divider(n_divider);
+    set_fractional_numerator(numerator);
+    set_fractional_denomerator(denomerator);
+    set_output_mux(lmx2594_output_a_mux::chdiv);
+    set_phase_detector_delay(vco_frequency);
     set_high_pd_frequency_calibration(pd_frequency);
     set_low_pd_frequency_calibration(pd_frequency);
     log_info(std::string(32, '-'));
+    if (_registers_map.regs.reg_R44.bits.MASH_ORDER ==
+        MASH_ORDER_type::integer) {
+      log_info("integer mode");
+    } else {
+      log_info("fractional mode");
+    }
     log_info("out_frequency (Hz) = " + std::to_string(out_frequency));
+    log_info("actual_out_frequency (Hz) = " +
+             std::to_string(actual_out_frequency));
     log_info("osc_frequency (Hz) = " + std::to_string(osc_frequency));
     log_info("vco_frequency (Hz) = " + std::to_string(vco_frequency));
     log_info("pd_frequency (Hz) = " + std::to_string(pd_frequency));
-    log_info("channel_divider = " + std::to_string(channel_divider_value));
+    log_info("channel_divider = " + std::to_string(actual_channel_divider));
     log_info("n_divider = " + std::to_string(n_divider));
+    log_info("numerator = " + std::to_string(numerator));
+    log_info("denomerator = " + std::to_string(denomerator));
     log_info(std::string(32, '-'));
   }
   auto is_integer_mode() const noexcept {
-    // TODO: add
-    return true;
+    using namespace lmx2594_registers;
+    bool is_integer{};
+    read(44, _registers_map.regs.reg_R44.reg);
+    if (_registers_map.regs.reg_R44.bits.MASH_ORDER ==
+        MASH_ORDER_type::integer) {
+      is_integer = true;
+    }
+    return is_integer;
   }
 
  private:
@@ -2109,7 +2163,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     _registers_map.regs.reg_R0.bits.MUXOUT_LD_SEL =
         MUXOUT_LD_SEL_type::lock_detect;
   }
-  void _set_phase_detector_delay(unsigned long long vco_frequency) const {
+  void _set_phase_detector_delay(uint64_t vco_frequency) const {
     using namespace lmx2594_registers;
     if (vco_frequency < lmx2594_constants::vco_frequency::min ||
         vco_frequency > get_vco_frequency_max()) {
@@ -2159,8 +2213,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
             "lmx2594::set_phase_detector_delay: invalid argument");
     }
   }
-  void _set_vco_calibration_divider(unsigned long long osc_frequency) const
-      noexcept {
+  void _set_vco_calibration_divider(uint64_t osc_frequency) const noexcept {
     using namespace lmx2594_registers;
     CAL_CLK_DIV_type divider{CAL_CLK_DIV_type::div1};
     if (osc_frequency > 800000000u) {
@@ -2176,7 +2229,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     using namespace lmx2594_registers;
     _registers_map.regs.reg_R44.bits.MASH_ORDER = value;
   }
-  void _set_high_pd_frequency_calibration(unsigned long pd_frequency) const
+  void _set_high_pd_frequency_calibration(uint32_t pd_frequency) const
       noexcept {
     using namespace lmx2594_registers;
     if (pd_frequency > 200000000ul) {
@@ -2193,8 +2246,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           FCAL_HPFD_ADJ_type::lower_100_MHz;
     }
   }
-  void _set_low_pd_frequency_calibration(unsigned long pd_frequency) const
-      noexcept {
+  void _set_low_pd_frequency_calibration(uint32_t pd_frequency) const noexcept {
     using namespace lmx2594_registers;
     if (pd_frequency < 2500000ul) {
       _registers_map.regs.reg_R0.bits.FCAL_LPFD_ADJ =
@@ -2210,6 +2262,6 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           FCAL_LPFD_ADJ_type::upper_10_MHz;
     }
   }
-};
+};  // namespace chappi
 
 }  // namespace chappi
