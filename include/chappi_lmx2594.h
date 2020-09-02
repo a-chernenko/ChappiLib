@@ -1292,7 +1292,7 @@ class registers_update {
 
   auto is_valid(int register_num) const noexcept {
     if (register_num < 0 ||
-        register_num > lmx2594_registers::register_max_num) {
+        register_num > lmx2594_registers::register_max_num - 1) {
       return false;
     }
     return true;
@@ -1401,7 +1401,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   void update_changes() const {
     log_info(__func__);
     using namespace lmx2594_registers;
-    for (int registers_count{register_max_num}; registers_count > 0;
+    for (int registers_count{register_max_num - 1}; registers_count != 0;
          --registers_count) {
       if (_registers_update.is_changed(registers_count)) {
         write(registers_count, _registers_map.array[registers_count]);
