@@ -1308,7 +1308,7 @@ class registers_update {
     }
     return false;
   }
-  auto is_changed() const noexcept { return (!_changed_registers.empty()); }
+  auto is_changed() const noexcept { return !_changed_registers.empty(); }
   template <typename Arg = int, typename... Args>
   auto set_changed(Arg register_num, Args... other_registers) noexcept {
     if (!is_valid(register_num)) {
@@ -1318,6 +1318,7 @@ class registers_update {
     return set_changed(other_registers...);
   }
   auto set_changed() noexcept { return true; }
+  auto get_changed() const noexcept { return _changed_registers.front(); }
   auto clear_changed(int register_num) noexcept {
     if (!is_valid(register_num)) {
       return false;
@@ -1401,13 +1402,11 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   void update_changes() const {
     log_info(__func__);
     using namespace lmx2594_registers;
-    for (int registers_count{register_max_num - 1}; registers_count != 0;
-         --registers_count) {
-      if (_registers_update.is_changed(registers_count)) {
-        write(registers_count, _registers_map.array[registers_count]);
-        _registers_update.clear_changed(registers_count);
-      }
-    }
+    while(_registers_update.is_changed()){
+      const auto registers_num = _registers_update.get_changed();
+      write(registers_num, _registers_map.array[registers_num]);
+      _registers_update.clear_changed(registers_num);
+    };
   }
   void reset() const {
     log_info(__func__);
