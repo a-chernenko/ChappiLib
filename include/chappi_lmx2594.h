@@ -22,7 +22,6 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
-
 #pragma once
 
 #include <algorithm>
@@ -868,15 +867,33 @@ struct register_R106 {
   const register_type D15 : 1;
 };
 
+enum class rb_VCO_SEL_type : register_type {
+  invalid,
+  vco1,
+  vco2,
+  vco3,
+  vco4,
+  vco5,
+  vco6,
+  vco7
+};
+
+enum class rb_LD_VTUNE_type : register_type {
+  vtune_low,
+  invalid_state,
+  locked,
+  vtune_high
+};
+
 struct register_R110 {
   const register_type D0 : 1;
   const register_type D1 : 1;
   const register_type D2 : 1;
   const register_type D3 : 1;
   const register_type D4 : 1;
-  register_type rb_VCO_SEL : 3;
+  rb_VCO_SEL_type rb_VCO_SEL : 3;
   const register_type D8 : 1;
-  register_type rb_LD_VTUNE : 2;
+  rb_LD_VTUNE_type rb_LD_VTUNE : 2;
   const register_type D11 : 1;
   const register_type D12 : 1;
   const register_type D13 : 1;
@@ -1340,9 +1357,9 @@ using lmx2594_doubler = lmx2594_registers::OSC_2X_type;
 using lmx2594_pre_divider = lmx2594_registers::register_type;
 using lmx2594_multiplier = lmx2594_registers::MULT_type;
 using lmx2594_divider = lmx2594_registers::register_type;
-using lmx2594_n_divider = lmx2594_registers::register_type;
-using lmx2594_fractional_numerator = lmx2594_registers::register_type;
-using lmx2594_fractional_denomerator = lmx2594_registers::register_type;
+using lmx2594_n_divider = uint32_t;
+using lmx2594_fractional_numerator = uint32_t;
+using lmx2594_fractional_denomerator = uint32_t;
 using lmx2594_lock_detect = lmx2594_registers::LD_TYPE_type;
 using lmx2594_lock_detect_mux = lmx2594_registers::MUXOUT_LD_SEL_type;
 using lmx2594_mash_order = lmx2594_registers::MASH_ORDER_type;
@@ -1404,8 +1421,6 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
       write(register_count, _registers_map.array[register_count]);
     } while (--register_count);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    _registers_map.regs.reg_R0.bits.FCAL_EN = FCAL_EN_type::calibrate_vco;
-    write(0, _registers_map.regs.reg_R0.reg);
   }
   void reset(error_type &error) const noexcept {
     helpers::noexcept_void_function<lmx2594, error_type, NoerrorValue,
@@ -1440,6 +1455,45 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return helpers::noexcept_get_function<lmx2594, error_type, NoerrorValue,
                                           bool, &lmx2594::is_enabled>(this,
                                                                       error);
+  }
+  void is_locked(bool &locked) const {
+    log_info(__func__);
+    locked = _is_locked();
+  }
+  bool is_locked() const {
+    bool locked{};
+    is_locked(locked);
+    return locked;
+  }
+  bool is_locked(error_type &error) const noexcept {
+    return helpers::noexcept_get_function<lmx2594, error_type, NoerrorValue,
+                                          bool, &lmx2594::is_locked>(this,
+                                                                     error);
+  }
+  void wait_lock_detect(bool &locked) const {
+    // FIXME:
+    log_info(__func__);
+    using namespace lmx2594_registers;
+    const int timeout_us{1000 * 1000};
+    const int cycle_us{10};
+    auto cycles = timeout_us / cycle_us;
+    do {
+      locked = _is_locked();
+      if (locked) {
+        break;
+      }
+      std::this_thread::sleep_for(std::chrono::microseconds(cycle_us));
+    } while (--cycles);
+  }
+  bool wait_lock_detect() const {
+    bool locked{};
+    wait_lock_detect(locked);
+    return locked;
+  }
+  bool wait_lock_detect(error_type &error) const noexcept {
+    return helpers::noexcept_get_function<lmx2594, error_type, NoerrorValue,
+                                          bool, &lmx2594::wait_lock_detect>(
+        this, error);
   }
   void set_output_enabled(const lmx2594_output_enable &data) const noexcept {
     log_info(__func__);
@@ -1692,6 +1746,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     using namespace lmx2594_registers;
     _registers_map.regs.reg_R0.bits.FCAL_EN = FCAL_EN_type::calibrate_vco;
     write(0, _registers_map.regs.reg_R0.reg);
+    _registers_map.regs.reg_R0.bits.FCAL_EN = FCAL_EN_type::disabled;
   }
   void vco_calibrate(error_type &error) const noexcept {
     helpers::noexcept_void_function<lmx2594, error_type, NoerrorValue,
@@ -1870,11 +1925,6 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return lmx2594_constants::actual_channel_divider_array
         [std::underlying_type_t<lmx2594_channel_divider>(register_value)];
   }
-  auto get_phase_detector_delay() const noexcept {
-    double pd_frequency{};
-    // TODO:
-    return pd_frequency;
-  }
   auto get_osc_frequency_max() const noexcept {
     using namespace lmx2594_registers;
     if (_registers_map.regs.reg_R9.bits.OSC_2X == OSC_2X_type::disabled) {
@@ -1962,6 +2012,9 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   void set_frequency(const lmx2594_output_frequency &data) const {
     log_info(__func__);
+    if (data.output == lmx2594_output::outb) {
+      throw std::runtime_error("lmx2594::set_frequency: unsupported output");
+    }
     using namespace lmx2594_registers;
     const auto out_frequency{static_cast<uint64_t>(data.frequency + 0.5)};
     const auto osc_frequency{static_cast<uint64_t>(data.reference + 0.5)};
@@ -1973,11 +2026,13 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     set_vco_calibration_divider(data.reference);
     if (out_frequency > lmx2594_constants::out_frequency::max ||
         out_frequency < lmx2594_constants::out_frequency::min) {
-      throw std::invalid_argument("lmx2594::set_frequency: invalid argument");
+      throw std::out_of_range(
+          "lmx2594::set_frequency: out_frequency out of range");
     }
     if (osc_frequency < lmx2594_constants::osc_frequency::min ||
         osc_frequency > get_osc_frequency_max()) {
-      throw std::invalid_argument("lmx2594::set_frequency: invalid argument");
+      throw std::out_of_range(
+          "lmx2594::set_frequency: osc_frequency out of range");
     }
     double osc_frequency_ratio =
         register_to_integer(_registers_map.regs.reg_R10.bits.MULT) *
@@ -2010,7 +2065,9 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           "lmx2594::set_frequency: n_divider out of range ");
     }
     const double num_denom_min = 1. / pd_frequency;
+    bool is_integer_mode{};
     if (((divider - n_divider) < num_denom_min)) {
+      is_integer_mode = true;
       set_mash_order(lmx2594_mash_order::integer);
       numerator = 0;
     } else if (!find_num_denom(divider - n_divider, numerator, denomerator)) {
@@ -2032,9 +2089,17 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     set_phase_detector_delay(vco_frequency);
     set_high_pd_frequency_calibration(pd_frequency);
     set_low_pd_frequency_calibration(pd_frequency);
+    set_charge_pump_gain(lmx2594_charge_pump_gain::current_15_mA);
+    update_changes();
+    vco_calibrate();
+    if (!wait_lock_detect()) {
+      throw std::runtime_error("lmx2594::set_frequency: not locked!");
+    }
+    update_charge_pump_gain(lmx2594_charge_pump_gain::current_6_mA);
     log_info(std::string(32, '-'));
-    if (_registers_map.regs.reg_R44.bits.MASH_ORDER ==
-        MASH_ORDER_type::integer) {
+    log_info(std::string(13, '-') + " PLL " + std::string(14, '-'));
+    log_info(std::string(32, '-'));
+    if (is_integer_mode) {
       log_info("integer mode");
     } else {
       log_info("fractional mode");
@@ -2051,16 +2116,6 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     log_info("denomerator = " + std::to_string(denomerator));
     log_info(std::string(32, '-'));
   }
-  auto is_integer_mode() const noexcept {
-    using namespace lmx2594_registers;
-    bool is_integer{};
-    read(44, _registers_map.regs.reg_R44.reg);
-    if (_registers_map.regs.reg_R44.bits.MASH_ORDER ==
-        MASH_ORDER_type::integer) {
-      is_integer = true;
-    }
-    return is_integer;
-  }
 
  private:
   template <typename Arg = int, typename... Args>
@@ -2069,6 +2124,15 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     _update_registers(other_registers...);
   }
   void _update_registers() const {}
+  auto _is_locked() const {
+    using namespace lmx2594_registers;
+    read(110, _registers_map.regs.reg_R110.reg);
+    const auto locked = (_registers_map.regs.reg_R110.bits.rb_LD_VTUNE ==
+                         rb_LD_VTUNE_type::locked)
+                            ? true
+                            : false;
+    return locked;
+  }
   void _set_output_enabled(const lmx2594_output_enable &data) const noexcept {
     using namespace lmx2594_registers;
     auto enabled{(data.enabled) ? OUT_PD_type::active : OUT_PD_type::powerdown};
@@ -2139,19 +2203,19 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   void _set_n_divider(const lmx2594_n_divider &value) const noexcept {
     using namespace lmx2594_registers;
     _registers_map.regs.reg_R36.bits.PLL_N_15_0 = value & 0xFFFF;
-    _registers_map.regs.reg_R34.bits.PLL_N_18_16 = (value >> 8) & 0x07;
+    _registers_map.regs.reg_R34.bits.PLL_N_18_16 = (value >> 16) & 0x0007;
   }
   void _set_fractional_numerator(
       const lmx2594_fractional_numerator &value) const noexcept {
     using namespace lmx2594_registers;
     _registers_map.regs.reg_R43.bits.PLL_NUM_15_0 = value & 0xFFFF;
-    _registers_map.regs.reg_R42.bits.PLL_NUM_31_16 = (value >> 8) & 0xFFFF;
+    _registers_map.regs.reg_R42.bits.PLL_NUM_31_16 = (value >> 16) & 0xFFFF;
   }
   void _set_fractional_denomerator(
       const lmx2594_fractional_denomerator &value) const noexcept {
     using namespace lmx2594_registers;
     _registers_map.regs.reg_R39.bits.PLL_DEN_15_0 = value & 0xFFFF;
-    _registers_map.regs.reg_R38.bits.PLL_DEN_31_16 = (value >> 8) & 0xFFFF;
+    _registers_map.regs.reg_R38.bits.PLL_DEN_31_16 = (value >> 16) & 0xFFFF;
   }
   void _set_lock_detect(const lmx2594_lock_detect &value) const noexcept {
     using namespace lmx2594_registers;
@@ -2160,8 +2224,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   void _set_lock_detect_mux(const lmx2594_lock_detect_mux &value) const
       noexcept {
     using namespace lmx2594_registers;
-    _registers_map.regs.reg_R0.bits.MUXOUT_LD_SEL =
-        MUXOUT_LD_SEL_type::lock_detect;
+    _registers_map.regs.reg_R0.bits.MUXOUT_LD_SEL = value;
   }
   void _set_phase_detector_delay(uint64_t vco_frequency) const {
     using namespace lmx2594_registers;
@@ -2238,7 +2301,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     } else if (pd_frequency > 150000000ul) {
       _registers_map.regs.reg_R0.bits.FCAL_HPFD_ADJ =
           FCAL_HPFD_ADJ_type::range_150_200_MHz;
-    } else if (pd_frequency > 100000000) {
+    } else if (pd_frequency > 100000000ul) {
       _registers_map.regs.reg_R0.bits.FCAL_HPFD_ADJ =
           FCAL_HPFD_ADJ_type::range_100_150_MHz;
     } else {
@@ -2262,6 +2325,6 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           FCAL_LPFD_ADJ_type::upper_10_MHz;
     }
   }
-};  // namespace chappi
+};
 
 }  // namespace chappi
