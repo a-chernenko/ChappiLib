@@ -22,6 +22,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
+
 #pragma once
 
 #include <algorithm>
@@ -1402,7 +1403,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   void update_changes() const {
     log_info(__func__);
     using namespace lmx2594_registers;
-    while(_registers_update.is_changed()){
+    while (_registers_update.is_changed()) {
       const auto registers_num = _registers_update.get_changed();
       write(registers_num, _registers_map.array[registers_num]);
       _registers_update.clear_changed(registers_num);
