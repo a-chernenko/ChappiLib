@@ -216,7 +216,7 @@ class chip_base {
     name += std::to_string(get_counts());
     return name;
   }
-#if defined(LOG_ENABLE)
+#if defined(CHAPPI_LOG_ENABLE)
   void log_info(const std::string &message) const noexcept {
     log << '[' << get_name() << "] " << message << '\n';
   }
@@ -233,7 +233,7 @@ class chip_base {
   void write(addr_type addr, value_type value) const {
     static const char error_msg[]{"chip reg write error"};
     error_type error = _reg_write(_dev_addr, addr, value);
-#if defined(LOG_ENABLE)
+#if defined(CHAPPI_LOG_ENABLE)
     log << '[' << get_name() << ']' << " <W> DEV:" << +_dev_addr
         << " | REG:" << +addr << " | VAL:" << +value << '\n';
 #endif
@@ -243,7 +243,7 @@ class chip_base {
   void read(addr_type addr, value_type &value) const {
     static const char error_msg[]{"chip reg read error"};
     error_type error = _reg_read(_dev_addr, addr, value);
-#if defined(LOG_ENABLE)
+#if defined(CHAPPI_LOG_ENABLE)
     log << '[' << get_name() << ']' << " <R> DEV:" << +_dev_addr
         << " | REG:" << +addr << " | VAL:" << +value << '\n';
 #endif

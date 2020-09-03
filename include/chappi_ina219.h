@@ -52,12 +52,12 @@ class ina219 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
          reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_INA219)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_INA219)
     log_info(__func__);
 #endif
   }
   ~ina219() noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_INA219)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_INA219)
     log_info(__func__);
 #endif
   }
@@ -67,7 +67,7 @@ class ina219 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return get_name(_chip_name, get_num());
   }
   void configure(value_type value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_INA219)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_INA219)
     log_info(__func__);
 #endif
     write(0x00, value);
@@ -77,7 +77,7 @@ class ina219 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &ina219::configure>(this, value, error);
   }
   void reset() const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_INA219)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_INA219)
     log_info(__func__);
 #endif
     value_type value{};
@@ -90,7 +90,7 @@ class ina219 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &ina219::reset>(this, error);
   }
   void get_shunt_voltage(double &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_INA219)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_INA219)
     log_info(__func__);
 #endif
     value_type retval{};
@@ -108,7 +108,7 @@ class ina219 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return value;
   }
   void get_bus_voltage(double &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_INA219)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_INA219)
     log_info(__func__);
 #endif
     value_type retval{};

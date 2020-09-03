@@ -61,12 +61,12 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_Si57x)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
     log_info(__func__);
 #endif
   }
   ~si57x() noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_Si57x)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
     log_info(__func__);
 #endif
   }
@@ -76,7 +76,7 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return get_name(_chip_name, get_num());
   }
   void reset() const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_Si57x)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
     log_info(__func__);
 #endif
     write(135, 0x80);
@@ -86,7 +86,7 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &si57x::reset>(this, error);
   }
   void freeze_dco(bool enabled) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_Si57x)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
     log_info(__func__);
 #endif
     write(137, (enabled) ? 0x10 : 0x00);
@@ -96,7 +96,7 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &si57x::freeze_dco>(this, enabled, error);
   }
   void apply_freq() const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_Si57x)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
     log_info(__func__);
 #endif
     write(135, 0x40);
@@ -106,7 +106,7 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &si57x::apply_freq>(this, error);
   }
   void set_freq(double value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_Si57x)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
     log_info(__func__);
 #endif
     freq_regs_type freq_regs{};
@@ -126,7 +126,7 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &si57x::set_freq>(this, value, error);
   }
   void get_freq(double &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_Si57x)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
     log_info(__func__);
 #endif
     freq_regs_type freq_regs{};

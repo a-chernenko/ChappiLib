@@ -1393,12 +1393,12 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
   }
   ~lmx2594() noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
   }
@@ -1408,7 +1408,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return get_name(_chip_name, get_num());
   }
   void update_changes() const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     using namespace lmx2594_registers;
@@ -1419,7 +1419,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     };
   }
   void reset() const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     using namespace lmx2594_registers;
@@ -1438,7 +1438,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &lmx2594::reset>(this, error);
   }
   void chip_enable(bool enabled) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     using namespace lmx2594_registers;
@@ -1451,7 +1451,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &lmx2594::chip_enable>(this, enabled, error);
   }
   void is_enabled(bool &enabled) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     using namespace lmx2594_registers;
@@ -1472,7 +1472,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                       error);
   }
   void is_locked(bool &locked) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     locked = _is_locked();
@@ -1489,7 +1489,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   void wait_lock_detect(bool &locked) const {
     // FIXME:
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     using namespace lmx2594_registers;
@@ -1515,14 +1515,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, error);
   }
   void set_output_enabled(const lmx2594_output_enable &data) const noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_output_enabled(data);
     _registers_update.set_changed(44);
   }
   void update_output_enabled(const lmx2594_output_enable &data) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_output_enabled(data);
@@ -1535,7 +1535,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                     error);
   }
   void is_output_enabled(lmx2594_output_enable &data) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     using namespace lmx2594_registers;
@@ -1568,14 +1568,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return data.enabled;
   }
   void set_output_power(const lmx2594_output_power &data) const noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_output_power(data);
     _registers_update.set_changed(45, 44);
   }
   void update_output_power(const lmx2594_output_power &data) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_output_power(data);
@@ -1588,14 +1588,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                   error);
   }
   void set_output_mux(const lmx2594_output_a_mux &value) const noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_output_mux(value);
     _registers_update.set_changed(45);
   }
   void update_output_mux(const lmx2594_output_a_mux &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_output_mux(value);
@@ -1608,14 +1608,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                 error);
   }
   void set_output_mux(const lmx2594_output_b_mux &value) const noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_output_mux(value);
     _registers_update.set_changed(46);
   }
   void update_output_mux(const lmx2594_output_b_mux &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_output_mux(value);
@@ -1629,14 +1629,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   void set_channel_divider(const lmx2594_channel_divider &value) const
       noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_channel_divider(value);
     _registers_update.set_changed(75, 31);
   }
   void update_channel_divider(const lmx2594_channel_divider &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_channel_divider(value);
@@ -1650,14 +1650,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   void set_charge_pump_gain(const lmx2594_charge_pump_gain &value) const
       noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_charge_pump_gain(value);
     _registers_update.set_changed(14);
   }
   void update_charge_pump_gain(const lmx2594_charge_pump_gain &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_charge_pump_gain(value);
@@ -1670,14 +1670,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, value, error);
   }
   void set_doubler(const lmx2594_doubler &value) const noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_doubler(value);
     _registers_update.set_changed(9);
   }
   void update_doubler(const lmx2594_doubler &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_doubler(value);
@@ -1690,14 +1690,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                              error);
   }
   void set_pre_divider(const lmx2594_pre_divider &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_pre_divider(value);
     _registers_update.set_changed(12);
   }
   void update_pre_divider(const lmx2594_pre_divider &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_pre_divider(value);
@@ -1710,14 +1710,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                  error);
   }
   void set_multiplier(const lmx2594_multiplier &value) const noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_multiplier(value);
     _registers_update.set_changed(10);
   }
   void update_multiplier(const lmx2594_multiplier &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_multiplier(value);
@@ -1730,14 +1730,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                 error);
   }
   void set_divider(const lmx2594_divider &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_divider(value);
     _registers_update.set_changed(11);
   }
   void update_divider(const lmx2594_divider &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_divider(value);
@@ -1750,14 +1750,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                              error);
   }
   void set_n_divider(const lmx2594_n_divider &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_n_divider(value);
     _registers_update.set_changed(36, 34);
   }
   void update_n_divider(const lmx2594_n_divider &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_n_divider(value);
@@ -1771,7 +1771,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   void set_fractional_numerator(const lmx2594_fractional_numerator &value) const
       noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_fractional_numerator(value);
@@ -1779,7 +1779,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   void update_fractional_numerator(
       const lmx2594_fractional_numerator &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_fractional_numerator(value);
@@ -1793,7 +1793,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   void set_fractional_denomerator(
       const lmx2594_fractional_denomerator &value) const noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_fractional_denomerator(value);
@@ -1801,7 +1801,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   void update_fractional_denomerator(
       const lmx2594_fractional_denomerator &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_fractional_denomerator(value);
@@ -1815,7 +1815,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, value, error);
   }
   void vco_calibrate() const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     using namespace lmx2594_registers;
@@ -1828,14 +1828,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &lmx2594::vco_calibrate>(this, error);
   }
   void set_lock_detect(const lmx2594_lock_detect &value) const noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_lock_detect(value);
     _registers_update.set_changed(59);
   }
   void update_lock_detect(const lmx2594_lock_detect &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_lock_detect(value);
@@ -1849,14 +1849,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   void set_lock_detect_mux(const lmx2594_lock_detect_mux &value) const
       noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_lock_detect_mux(value);
     _registers_update.set_changed(0);
   }
   void update_lock_detect_mux(const lmx2594_lock_detect_mux &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_lock_detect_mux(value);
@@ -1869,14 +1869,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, value, error);
   }
   void set_phase_detector_delay(uint64_t vco_frequency) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_phase_detector_delay(vco_frequency);
     _registers_update.set_changed(37);
   }
   void update_phase_detector_delay(uint64_t vco_frequency) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_phase_detector_delay(vco_frequency);
@@ -1889,14 +1889,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, vco_frequency, error);
   }
   void set_vco_calibration_divider(uint64_t osc_frequency) const noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_vco_calibration_divider(osc_frequency);
     _registers_update.set_changed(1, 4);
   }
   void update_vco_calibration_divider(uint64_t osc_frequency) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_vco_calibration_divider(osc_frequency);
@@ -1909,14 +1909,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, osc_frequency, error);
   }
   void set_mash_order(const lmx2594_mash_order &value) const noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_mash_order(value);
     _registers_update.set_changed(44);
   }
   void update_mash_order(const lmx2594_mash_order &value) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_mash_order(value);
@@ -1929,14 +1929,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                 error);
   }
   void set_high_pd_frequency_calibration(uint32_t pd_frequency) const noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_high_pd_frequency_calibration(pd_frequency);
     _registers_update.set_changed(0);
   }
   void update_high_pd_frequency_calibration(uint32_t pd_frequency) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_high_pd_frequency_calibration(pd_frequency);
@@ -1950,14 +1950,14 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                         error);
   }
   void set_low_pd_frequency_calibration(uint32_t pd_frequency) const noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_low_pd_frequency_calibration(pd_frequency);
     _registers_update.set_changed(0);
   }
   void update_low_pd_frequency_calibration(uint32_t pd_frequency) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     _set_low_pd_frequency_calibration(pd_frequency);
@@ -2114,7 +2114,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return false;
   }
   void set_frequency(const lmx2594_output_frequency &data) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
     using namespace lmx2594_registers;
@@ -2194,7 +2194,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
       throw std::runtime_error("lmx2594::set_frequency: not locked!");
     }
     update_charge_pump_gain(lmx2594_charge_pump_gain::current_6_mA);
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     auto actual_out_frequency = uint64_t(std::round(
         pd_frequency * (n_divider + double(numerator) / double(denomerator)) /
         double(actual_channel_divider)));

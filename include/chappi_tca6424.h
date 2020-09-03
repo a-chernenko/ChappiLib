@@ -59,12 +59,12 @@ class tca6424 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_TCA6424)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_TCA6424)
     log_info(__func__);
 #endif
   }
   ~tca6424() noexcept {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_TCA6424)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_TCA6424)
     log_info(__func__);
 #endif
   }
@@ -74,7 +74,7 @@ class tca6424 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return get_name(_chip_name, get_num());
   }
   void configure_port(const tca6424_port_data &data) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_TCA6424)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_TCA6424)
     log_info(__func__);
 #endif
     write(0x0c + static_cast<int>(data.port), data.value);
@@ -86,7 +86,7 @@ class tca6424 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, data, error);
   }
   void set_port(const tca6424_port_data &data) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_TCA6424)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_TCA6424)
     log_info(__func__);
 #endif
     write(0x04 + static_cast<int>(data.port), data.value);
@@ -98,7 +98,7 @@ class tca6424 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, data, error);
   }
   void get_port(tca6424_port_data &data) const {
-#if defined(LOG_ENABLE) && defined(LOG_ENABLE_TCA6424)
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_TCA6424)
     log_info(__func__);
 #endif
     read(0x04 + static_cast<int>(data.port), data.value);
