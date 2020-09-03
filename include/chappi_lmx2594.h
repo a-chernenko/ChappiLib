@@ -27,6 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <forward_list>
 #include <thread>
 
@@ -1392,16 +1393,24 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
   }
-  ~lmx2594() noexcept { log_info(__func__); }
+  ~lmx2594() noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+    log_info(__func__);
+#endif
+  }
   int get_num() const noexcept final { return _counter.data.get_num(); }
   int get_counts() const noexcept final { return _counter.data.get_counts(); }
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
   }
   void update_changes() const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     using namespace lmx2594_registers;
     while (_registers_update.is_changed()) {
       const auto registers_num = _registers_update.get_changed();
@@ -1410,7 +1419,9 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     };
   }
   void reset() const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     using namespace lmx2594_registers;
     _registers_map.regs.reg_R0.bits.RESET = RESET_type::reset;
     write(0, _registers_map.regs.reg_R0.reg);
@@ -1419,7 +1430,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     auto register_count{register_max_num - 1};
     do {
       write(register_count, _registers_map.array[register_count]);
-    } while (--register_count);
+    } while (register_count--);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
   void reset(error_type &error) const noexcept {
@@ -1427,7 +1438,9 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &lmx2594::reset>(this, error);
   }
   void chip_enable(bool enabled) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     using namespace lmx2594_registers;
     _registers_map.regs.reg_R0.bits.POWERDOWN =
         (enabled) ? POWERDOWN_type::normal : POWERDOWN_type::powerdown;
@@ -1438,7 +1451,9 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &lmx2594::chip_enable>(this, enabled, error);
   }
   void is_enabled(bool &enabled) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     using namespace lmx2594_registers;
     read(0, _registers_map.regs.reg_R0.reg);
     enabled =
@@ -1457,7 +1472,9 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                       error);
   }
   void is_locked(bool &locked) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     locked = _is_locked();
   }
   bool is_locked() const {
@@ -1472,9 +1489,11 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   void wait_lock_detect(bool &locked) const {
     // FIXME:
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     using namespace lmx2594_registers;
-    const int timeout_us{1000 * 1000};
+    const int timeout_us{50 * 1000};
     const int cycle_us{10};
     auto cycles = timeout_us / cycle_us;
     do {
@@ -1496,12 +1515,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, error);
   }
   void set_output_enabled(const lmx2594_output_enable &data) const noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_output_enabled(data);
     _registers_update.set_changed(44);
   }
   void update_output_enabled(const lmx2594_output_enable &data) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_output_enabled(data);
     _update_registers(44);
   }
@@ -1512,7 +1535,9 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                     error);
   }
   void is_output_enabled(lmx2594_output_enable &data) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     using namespace lmx2594_registers;
     read(44, _registers_map.regs.reg_R44.reg);
     if (data.output == lmx2594_output::outa) {
@@ -1543,12 +1568,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return data.enabled;
   }
   void set_output_power(const lmx2594_output_power &data) const noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_output_power(data);
     _registers_update.set_changed(45, 44);
   }
   void update_output_power(const lmx2594_output_power &data) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_output_power(data);
     _update_registers(45, 44);
   }
@@ -1559,12 +1588,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                   error);
   }
   void set_output_mux(const lmx2594_output_a_mux &value) const noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_output_mux(value);
     _registers_update.set_changed(45);
   }
   void update_output_mux(const lmx2594_output_a_mux &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_output_mux(value);
     _update_registers(45);
   }
@@ -1575,12 +1608,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                 error);
   }
   void set_output_mux(const lmx2594_output_b_mux &value) const noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_output_mux(value);
     _registers_update.set_changed(46);
   }
   void update_output_mux(const lmx2594_output_b_mux &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_output_mux(value);
     _update_registers(46);
   }
@@ -1592,12 +1629,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   void set_channel_divider(const lmx2594_channel_divider &value) const
       noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_channel_divider(value);
     _registers_update.set_changed(75, 31);
   }
   void update_channel_divider(const lmx2594_channel_divider &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_channel_divider(value);
     _update_registers(75, 31);
   }
@@ -1609,12 +1650,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   void set_charge_pump_gain(const lmx2594_charge_pump_gain &value) const
       noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_charge_pump_gain(value);
     _registers_update.set_changed(14);
   }
   void update_charge_pump_gain(const lmx2594_charge_pump_gain &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_charge_pump_gain(value);
     _update_registers(14);
   }
@@ -1625,12 +1670,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, value, error);
   }
   void set_doubler(const lmx2594_doubler &value) const noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_doubler(value);
     _registers_update.set_changed(9);
   }
   void update_doubler(const lmx2594_doubler &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_doubler(value);
     _update_registers(9);
   }
@@ -1641,12 +1690,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                              error);
   }
   void set_pre_divider(const lmx2594_pre_divider &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_pre_divider(value);
     _registers_update.set_changed(12);
   }
   void update_pre_divider(const lmx2594_pre_divider &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_pre_divider(value);
     _update_registers(12);
   }
@@ -1657,12 +1710,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                  error);
   }
   void set_multiplier(const lmx2594_multiplier &value) const noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_multiplier(value);
     _registers_update.set_changed(10);
   }
   void update_multiplier(const lmx2594_multiplier &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_multiplier(value);
     _update_registers(10);
   }
@@ -1673,12 +1730,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                 error);
   }
   void set_divider(const lmx2594_divider &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_divider(value);
     _registers_update.set_changed(11);
   }
   void update_divider(const lmx2594_divider &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_divider(value);
     _update_registers(11);
   }
@@ -1689,12 +1750,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                              error);
   }
   void set_n_divider(const lmx2594_n_divider &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_n_divider(value);
     _registers_update.set_changed(36, 34);
   }
   void update_n_divider(const lmx2594_n_divider &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_n_divider(value);
     _update_registers(36, 34);
   }
@@ -1706,13 +1771,17 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   void set_fractional_numerator(const lmx2594_fractional_numerator &value) const
       noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_fractional_numerator(value);
     _registers_update.set_changed(43, 42);
   }
   void update_fractional_numerator(
       const lmx2594_fractional_numerator &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_fractional_numerator(value);
     _update_registers(43, 42);
   }
@@ -1724,13 +1793,17 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   void set_fractional_denomerator(
       const lmx2594_fractional_denomerator &value) const noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_fractional_denomerator(value);
     _registers_update.set_changed(39, 38);
   }
   void update_fractional_denomerator(
       const lmx2594_fractional_denomerator &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_fractional_denomerator(value);
     _update_registers(39, 38);
   }
@@ -1742,7 +1815,9 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, value, error);
   }
   void vco_calibrate() const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     using namespace lmx2594_registers;
     _registers_map.regs.reg_R0.bits.FCAL_EN = FCAL_EN_type::calibrate_vco;
     write(0, _registers_map.regs.reg_R0.reg);
@@ -1753,12 +1828,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &lmx2594::vco_calibrate>(this, error);
   }
   void set_lock_detect(const lmx2594_lock_detect &value) const noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_lock_detect(value);
     _registers_update.set_changed(59);
   }
   void update_lock_detect(const lmx2594_lock_detect &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_lock_detect(value);
     _update_registers(59);
   }
@@ -1770,12 +1849,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   void set_lock_detect_mux(const lmx2594_lock_detect_mux &value) const
       noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_lock_detect_mux(value);
     _registers_update.set_changed(0);
   }
   void update_lock_detect_mux(const lmx2594_lock_detect_mux &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_lock_detect_mux(value);
     _update_registers(0);
   }
@@ -1786,12 +1869,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, value, error);
   }
   void set_phase_detector_delay(uint64_t vco_frequency) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_phase_detector_delay(vco_frequency);
     _registers_update.set_changed(37);
   }
   void update_phase_detector_delay(uint64_t vco_frequency) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_phase_detector_delay(vco_frequency);
     _update_registers(37);
   }
@@ -1802,14 +1889,18 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, vco_frequency, error);
   }
   void set_vco_calibration_divider(uint64_t osc_frequency) const noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_vco_calibration_divider(osc_frequency);
-    _registers_update.set_changed(1);
+    _registers_update.set_changed(1, 4);
   }
   void update_vco_calibration_divider(uint64_t osc_frequency) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_vco_calibration_divider(osc_frequency);
-    _update_registers(1);
+    _update_registers(1, 4);
   }
   void update_vco_calibration_divider(uint64_t osc_frequency,
                                       error_type &error) const noexcept {
@@ -1818,12 +1909,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, osc_frequency, error);
   }
   void set_mash_order(const lmx2594_mash_order &value) const noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_mash_order(value);
     _registers_update.set_changed(44);
   }
   void update_mash_order(const lmx2594_mash_order &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_mash_order(value);
     _update_registers(44);
   }
@@ -1834,12 +1929,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                 error);
   }
   void set_high_pd_frequency_calibration(uint32_t pd_frequency) const noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_high_pd_frequency_calibration(pd_frequency);
     _registers_update.set_changed(0);
   }
   void update_high_pd_frequency_calibration(uint32_t pd_frequency) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_high_pd_frequency_calibration(pd_frequency);
     _update_registers(0);
   }
@@ -1851,12 +1950,16 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                         error);
   }
   void set_low_pd_frequency_calibration(uint32_t pd_frequency) const noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_low_pd_frequency_calibration(pd_frequency);
     _registers_update.set_changed(0);
   }
   void update_low_pd_frequency_calibration(uint32_t pd_frequency) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
+#endif
     _set_low_pd_frequency_calibration(pd_frequency);
     _update_registers(0);
   }
@@ -1910,7 +2013,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         if (vco_frequency > 10000000000ull) {
           n_divider_min = 48;
         } else {
-          n_divider_min = 40;
+          n_divider_min = 44;
         }
         break;
       default:
@@ -1927,10 +2030,10 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   }
   auto get_osc_frequency_max() const noexcept {
     using namespace lmx2594_registers;
-    if (_registers_map.regs.reg_R9.bits.OSC_2X == OSC_2X_type::disabled) {
+    if (_registers_map.regs.reg_R9.bits.OSC_2X != OSC_2X_type::disabled) {
       return 200000000ull;
     }
-    return 14000000000ull;
+    return 1400000000ull;
   }
   auto get_pd_frequency_max() const noexcept {
     using namespace lmx2594_registers;
@@ -2011,10 +2114,9 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return false;
   }
   void set_frequency(const lmx2594_output_frequency &data) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
     log_info(__func__);
-    if (data.output == lmx2594_output::outb) {
-      throw std::runtime_error("lmx2594::set_frequency: unsupported output");
-    }
+#endif
     using namespace lmx2594_registers;
     const auto out_frequency{static_cast<uint64_t>(data.frequency + 0.5)};
     const auto osc_frequency{static_cast<uint64_t>(data.reference + 0.5)};
@@ -2078,10 +2180,6 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     numerator *= lmx2594_constants::fraction::denominator::max / denomerator;
     denomerator = denomerator *
                   (lmx2594_constants::fraction::denominator::max / denomerator);
-    auto actual_out_frequency = uint64_t(
-        0.5 + pd_frequency *
-                  (n_divider + double(numerator) / double(denomerator)) /
-                  double(actual_channel_divider));
     set_n_divider(n_divider);
     set_fractional_numerator(numerator);
     set_fractional_denomerator(denomerator);
@@ -2096,6 +2194,10 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
       throw std::runtime_error("lmx2594::set_frequency: not locked!");
     }
     update_charge_pump_gain(lmx2594_charge_pump_gain::current_6_mA);
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_LMX2594)
+    auto actual_out_frequency = uint64_t(std::round(
+        pd_frequency * (n_divider + double(numerator) / double(denomerator)) /
+        double(actual_channel_divider)));
     log_info(std::string(32, '-'));
     log_info(std::string(13, '-') + " PLL " + std::string(14, '-'));
     log_info(std::string(32, '-'));
@@ -2115,6 +2217,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     log_info("numerator = " + std::to_string(numerator));
     log_info("denomerator = " + std::to_string(denomerator));
     log_info(std::string(32, '-'));
+#endif
   }
 
  private:
@@ -2235,37 +2338,37 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     }
     switch (_registers_map.regs.reg_R44.bits.MASH_ORDER) {
       case MASH_ORDER_type::integer:
-        if (vco_frequency > 12500000000u) {
+        if (vco_frequency > 12500000000ull) {
           _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 2;
         } else {
           _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 1;
         }
         break;
       case MASH_ORDER_type::frac1:
-        if (vco_frequency > 12500000000u) {
+        if (vco_frequency > 12500000000ull) {
           _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 3;
-        } else if (vco_frequency > 10000000000u) {
+        } else if (vco_frequency > 10000000000ull) {
           _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 2;
         } else {
           _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 1;
         }
         break;
       case MASH_ORDER_type::frac2:
-        if (vco_frequency > 10000000000u) {
+        if (vco_frequency > 10000000000ull) {
           _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 3;
         } else {
           _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 2;
         }
         break;
       case MASH_ORDER_type::frac3:
-        if (vco_frequency > 10000000000u) {
+        if (vco_frequency > 10000000000ull) {
           _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 4;
         } else {
           _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 3;
         }
         break;
       case MASH_ORDER_type::frac4:
-        if (vco_frequency > 10000000000u) {
+        if (vco_frequency > 10000000000ull) {
           _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 6;
         } else {
           _registers_map.regs.reg_R37.bits.PFD_DLY_SEL = 5;
@@ -2286,7 +2389,10 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     } else if (osc_frequency > 200000000u) {
       divider = CAL_CLK_DIV_type::div2;
     }
-    _registers_map.regs.reg_R1.bits.CAL_CLK_DIV = CAL_CLK_DIV_type::div1;
+    const double smclk_frequency =
+        osc_frequency / std::pow(2, register_to_integer(divider));
+    _registers_map.regs.reg_R4.bits.ACAL_CMP_DLY =
+        register_type(std::ceil(smclk_frequency / 10000000.)) + 1;
   }
   void _set_mash_order(const lmx2594_mash_order &value) const noexcept {
     using namespace lmx2594_registers;
