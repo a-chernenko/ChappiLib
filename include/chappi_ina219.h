@@ -52,16 +52,24 @@ class ina219 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
          reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_INA219)
     log_info(__func__);
+#endif
   }
-  ~ina219() noexcept { log_info(__func__); }
+  ~ina219() noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_INA219)
+    log_info(__func__);
+#endif
+  }
   int get_num() const noexcept final { return _counter.data.get_num(); }
   int get_counts() const noexcept final { return _counter.data.get_counts(); }
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
   }
   void configure(value_type value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_INA219)
     log_info(__func__);
+#endif
     write(0x00, value);
   }
   void configure(value_type value, error_type &error) const noexcept {
@@ -69,7 +77,9 @@ class ina219 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &ina219::configure>(this, value, error);
   }
   void reset() const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_INA219)
     log_info(__func__);
+#endif
     value_type value{};
     read(0x00, value);
     value |= (0x8000);
@@ -80,7 +90,9 @@ class ina219 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &ina219::reset>(this, error);
   }
   void get_shunt_voltage(double &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_INA219)
     log_info(__func__);
+#endif
     value_type retval{};
     read(0x01, retval);
     value = (retval & 0x3FFF);
@@ -96,7 +108,9 @@ class ina219 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return value;
   }
   void get_bus_voltage(double &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_INA219)
     log_info(__func__);
+#endif
     value_type retval{};
     read(0x02, retval);
     value = ((retval >> 3) & 0x1FFF);

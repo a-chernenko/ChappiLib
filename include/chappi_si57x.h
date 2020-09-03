@@ -61,16 +61,24 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_Si57x)
     log_info(__func__);
+#endif
   }
-  ~si57x() noexcept { log_info(__func__); }
+  ~si57x() noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_Si57x)
+    log_info(__func__);
+#endif
+  }
   int get_num() const noexcept final { return _counter.data.get_num(); }
   int get_counts() const noexcept final { return _counter.data.get_counts(); }
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
   }
   void reset() const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_Si57x)
     log_info(__func__);
+#endif
     write(135, 0x80);
   }
   void reset(error_type &error) const noexcept {
@@ -78,7 +86,9 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &si57x::reset>(this, error);
   }
   void freeze_dco(bool enabled) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_Si57x)
     log_info(__func__);
+#endif
     write(137, (enabled) ? 0x10 : 0x00);
   }
   void freeze_dco(bool enabled, error_type &error) const noexcept {
@@ -86,7 +96,9 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &si57x::freeze_dco>(this, enabled, error);
   }
   void apply_freq() const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_Si57x)
     log_info(__func__);
+#endif
     write(135, 0x40);
   }
   void apply_freq(error_type &error) const noexcept {
@@ -94,7 +106,9 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &si57x::apply_freq>(this, error);
   }
   void set_freq(double value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_Si57x)
     log_info(__func__);
+#endif
     freq_regs_type freq_regs{};
     if (_make_freq_regs(value, _fxtal, freq_regs) != true) {
       auto error_msg =
@@ -112,7 +126,9 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &si57x::set_freq>(this, value, error);
   }
   void get_freq(double &value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_Si57x)
     log_info(__func__);
+#endif
     freq_regs_type freq_regs{};
     addr_type addr{start_addr};
     for (auto &reg : freq_regs) {
@@ -121,14 +137,12 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     }
     value = _calculate_freq(_fxtal, freq_regs);
   }
-
   double get_freq(error_type &error) const noexcept {
     return helpers::noexcept_get_function<si57x, error_type, NoerrorValue,
                                           double, &si57x::get_freq>(this,
                                                                     error);
   }
   double get_freq() const {
-    log_info(__func__);
     double value{};
     get_freq(value);
     return value;
@@ -136,7 +150,6 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   void set_fxtal(double fxtal) noexcept { _fxtal = fxtal; }
   double get_fxtal() const noexcept { return _fxtal; }
   void calib_fxtal(double freq_gen) noexcept {
-    log_info(__func__);
     freq_regs_type freq_regs{};
     addr_type addr{start_addr};
     for (auto &reg : freq_regs) {
@@ -190,15 +203,15 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
       return false;
     }
     reg[reg_addr_to_idx(7)] = reg[reg_addr_to_idx(13)] =
-        (hs_div << 5) | (n1 >> 2);
+        value_type((hs_div << 5) | (n1 >> 2));
     reg[reg_addr_to_idx(8)] = reg[reg_addr_to_idx(14)] =
-        (n1 << 6) | (rfreq_hi >> 4);
+        value_type((n1 << 6) | (rfreq_hi >> 4));
     reg[reg_addr_to_idx(9)] = reg[reg_addr_to_idx(15)] =
-        (rfreq_hi << 4) | (rfreq_lo >> 24);
+        value_type((rfreq_hi << 4) | (rfreq_lo >> 24));
     reg[reg_addr_to_idx(10)] = reg[reg_addr_to_idx(16)] =
-        (rfreq_lo >> 16) & 0xFF;
+        value_type((rfreq_lo >> 16) & 0xFF);
     reg[reg_addr_to_idx(11)] = reg[reg_addr_to_idx(17)] =
-        (rfreq_lo >> 8) & 0xFF;
+        value_type((rfreq_lo >> 8) & 0xFF);
     reg[reg_addr_to_idx(12)] = reg[reg_addr_to_idx(18)] = rfreq_lo & 0xFF;
     return true;
   }
@@ -267,6 +280,6 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     freq *= rfreq;
     return freq;
   }
-};  // namespace chappi
+};
 
 }  // namespace chappi

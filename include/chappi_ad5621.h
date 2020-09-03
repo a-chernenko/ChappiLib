@@ -52,17 +52,25 @@ class ad5621 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
          reg_write_fn reg_write = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
                   value_type>{buf_ptr} {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_AD5621)
     log_info(__func__);
+#endif
   }
-  ~ad5621() noexcept { log_info(__func__); }
+  ~ad5621() noexcept {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_AD5621)
+    log_info(__func__);
+#endif
+  }
   int get_num() const noexcept final { return _counter.data.get_num(); }
   int get_counts() const noexcept final { return _counter.data.get_counts(); }
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
   }
   void set_value(value_type value) const {
+#if defined(LOG_ENABLE) && defined(LOG_ENABLE_AD5621)
     log_info(__func__);
-    write(0x00, value << 2);
+#endif
+    write(0x00, value_type(value << 2));
   }
   void set_value(value_type value, error_type &error) const noexcept {
     helpers::noexcept_set_function<ad5621, error_type, NoerrorValue, value_type,
