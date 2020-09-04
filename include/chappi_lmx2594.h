@@ -2101,7 +2101,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           break;
         }
         const auto numerator_tmp = numerator_last * a + numerator_prev;
-        epsilon = 1 / epsilon - a;
+        epsilon = 1. / epsilon - a;
         numerator_prev = numerator_last;
         numerator_last = numerator_tmp;
         denomerator_prev = denomerator_last;
