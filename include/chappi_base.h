@@ -213,7 +213,7 @@ class chip_base {
     std::string name{};
     name += chip_name;
     name += '-';
-    name += std::to_string(get_counts());
+    name += std::to_string(get_num());
     return name;
   }
 #if defined(CHAPPI_LOG_ENABLE)
