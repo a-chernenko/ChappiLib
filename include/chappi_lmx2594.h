@@ -2123,7 +2123,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     set_doubler(lmx2594_doubler::disabled);
     set_pre_divider(1);
     set_multiplier(lmx2594_multiplier::bypass);
-    set_divider(2);
+    set_divider(1);
     set_mash_order(lmx2594_mash_order::frac3);
     set_vco_calibration_divider(data.reference);
     if (out_frequency > lmx2594_constants::out_frequency::max ||
