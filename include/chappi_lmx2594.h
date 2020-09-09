@@ -2126,6 +2126,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     set_divider(1);
     set_mash_order(lmx2594_mash_order::frac3);
     set_vco_calibration_divider(data.reference);
+    set_channel_divider(lmx2594_channel_divider::div2);
     if (out_frequency > lmx2594_constants::out_frequency::max ||
         out_frequency < lmx2594_constants::out_frequency::min) {
       throw std::out_of_range(
