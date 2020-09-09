@@ -2125,7 +2125,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     set_multiplier(lmx2594_multiplier::bypass);
     set_divider(1);
     set_mash_order(lmx2594_mash_order::frac3);
-    set_vco_calibration_divider(data.reference);
+    set_vco_calibration_divider(uint64_t(data.reference));
     set_channel_divider(lmx2594_channel_divider::div2);
     if (out_frequency > lmx2594_constants::out_frequency::max ||
         out_frequency < lmx2594_constants::out_frequency::min) {
@@ -2149,7 +2149,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           "lmx2594::set_frequency: pd_frequency out of range");
     }
     const auto channel_divider =
-        get_channel_divider(out_frequency, pd_frequency);
+        get_channel_divider(out_frequency, uint64_t(pd_frequency));
     set_channel_divider(channel_divider);
     const uint32_t actual_channel_divider =
         get_actual_channel_divider(channel_divider);
@@ -2186,8 +2186,8 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     set_fractional_denomerator(denomerator);
     set_output_mux(lmx2594_output_a_mux::chdiv);
     set_phase_detector_delay(vco_frequency);
-    set_high_pd_frequency_calibration(pd_frequency);
-    set_low_pd_frequency_calibration(pd_frequency);
+    set_high_pd_frequency_calibration(uint32_t(pd_frequency));
+    set_low_pd_frequency_calibration(uint32_t(pd_frequency));
     set_charge_pump_gain(lmx2594_charge_pump_gain::current_15_mA);
     update_changes();
     vco_calibrate();
