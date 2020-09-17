@@ -32,9 +32,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "chappi_except.h"
 
-#if __cplusplus < 201103L
+#if __cplusplus < 201402L
 #error \
-    "This file requires compiler and library support for the ISO C++ 2011 standard or later."
+    "This file requires compiler and library support for the ISO C++ 2014 standard or later."
 #endif
 
 namespace chappi {
