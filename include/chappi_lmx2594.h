@@ -31,6 +31,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <forward_list>
 #include <thread>
 
+#ifdef _MSC_VER
+#if _MSVC_LANG < 201704
+#error \
+    "This file requires compiler and library support for the ISO C++ 2020 standard or later."
+#endif
+#endif
 #include "chappi_base.h"
 
 namespace chappi {
@@ -83,7 +89,7 @@ namespace lmx2594_registers {
 using register_type = uint16_t;
 
 template <typename T>
-inline register_type register_to_integer(T value) noexcept {
+inline constexpr register_type register_to_integer(T value) noexcept {
   return static_cast<std::underlying_type_t<T>>(value);
 }
 
@@ -1390,9 +1396,9 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   lmx2594(bool log_enable)
       : lmx2594{(log_enable) ? std::clog.rdbuf() : nullptr} {}
   lmx2594(std::streambuf *buf_ptr = {}, reg_read_fn reg_read = {},
-          reg_write_fn reg_write = {})
+          reg_write_fn reg_write = {}, dev_addr_type dev_addr = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
-                  value_type>{buf_ptr} {
+                  value_type>{buf_ptr, reg_read , reg_write, dev_addr} {
 #if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LMX2594)
     log_info(__func__);
 #endif
@@ -2061,8 +2067,7 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     }
     return 15000000000ull;
   }
-  auto get_channel_divider(uint64_t out_frequency,
-                           uint64_t pd_frequency) const {
+  auto get_channel_divider(uint64_t out_frequency, double pd_frequency) const {
     std::underlying_type_t<lmx2594_channel_divider> chdiv{};
     for (const auto channel_divider :
          lmx2594_constants::actual_channel_divider_array) {

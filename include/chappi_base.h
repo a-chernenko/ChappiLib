@@ -163,21 +163,13 @@ int chips_counter<ClassType>::_counts{-1};
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
                   ValueType>::no_error_value;                              \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
-                  ValueType>::chip_base;                                   \
-  using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
                   ValueType>::get_name;                                    \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
                   ValueType>::read;                                        \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
                   ValueType>::write;                                       \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
-                  ValueType>::log;                                         \
-  using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
-                  ValueType>::log_info;                                    \
-  using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
-                  ValueType>::log_set_enabled;                             \
-  using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
-                  ValueType>::log_is_enabled;
+                  ValueType>::log;
 
 template <typename ErrorType, ErrorType NoerrorValue, typename DevAddrType,
           typename AddrType, typename ValueType>
@@ -201,8 +193,8 @@ class chip_base {
   mutable logstream log;
   const error_type no_error_value;
   chip_base(bool log_enable) : log{log_enable}, no_error_value{NoerrorValue} {}
-  chip_base(std::streambuf *buf_ptr = {}, const reg_read_fn &reg_read = {},
-            const reg_write_fn &reg_write = {}, addr_type dev_addr = {})
+  chip_base(std::streambuf *buf_ptr = {}, reg_read_fn &reg_read = {},
+            reg_write_fn &reg_write = {}, dev_addr_type dev_addr = {})
       : log{buf_ptr},
         no_error_value{NoerrorValue},
         _dev_addr{dev_addr},

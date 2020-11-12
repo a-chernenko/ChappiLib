@@ -49,9 +49,9 @@ class ina219 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   ina219(bool log_enable)
       : ina219{(log_enable) ? std::clog.rdbuf() : nullptr} {}
   ina219(std::streambuf *buf_ptr = {}, reg_read_fn reg_read = {},
-         reg_write_fn reg_write = {})
+         reg_write_fn reg_write = {}, dev_addr_type dev_addr = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
-                  value_type>{buf_ptr} {
+                  value_type>{buf_ptr, reg_read , reg_write, dev_addr} {
 #if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_INA219)
     log_info(__func__);
 #endif
