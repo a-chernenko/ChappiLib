@@ -28,6 +28,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <functional>
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include "chappi_except.h"
@@ -41,7 +42,7 @@ namespace chappi {
 
 class logstream {
   bool _enabled{true};
-  std::ostream _log;
+  std::shared_ptr<std::ostream> _log{};
 
  public:
   logstream(bool log_enable)
@@ -51,7 +52,7 @@ class logstream {
   template <typename Type>
   logstream &operator<<(Type &&rhs) {
     if (_enabled) {
-      _log << std::forward<Type>(rhs);
+      *_log << std::forward<Type>(rhs);
     }
     return *this;
   }
@@ -163,13 +164,21 @@ int chips_counter<ClassType>::_counts{-1};
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
                   ValueType>::no_error_value;                              \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
+                  ValueType>::chip_base;                                   \
+  using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
                   ValueType>::get_name;                                    \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
                   ValueType>::read;                                        \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
                   ValueType>::write;                                       \
   using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
-                  ValueType>::log;
+                  ValueType>::log;                                         \
+  using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
+                  ValueType>::log_info;                                    \
+  using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
+                  ValueType>::log_set_enabled;                             \
+  using chip_base<ErrorType, NoerrorValue, DevAddrType, AddrType,          \
+                  ValueType>::log_is_enabled;
 
 template <typename ErrorType, ErrorType NoerrorValue, typename DevAddrType,
           typename AddrType, typename ValueType>
