@@ -157,8 +157,10 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
       ++addr;
     }
     _fxtal = _calculate_fxtal(freq_gen, freq_regs);
+#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
     log << '[' << get_name() << ']' << " Fxtal = " << std::setprecision(12)
         << _fxtal << '\n';
+#endif
   }
   void calib_fxtal(double freq_gen, error_type &error) const noexcept {
     helpers::noexcept_set_function<si57x, error_type, NoerrorValue, double,
