@@ -58,13 +58,13 @@ class tca6424 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   tca6424(std::streambuf *buf_ptr = {}, reg_read_fn reg_read = {},
           reg_write_fn reg_write = {}, dev_addr_type dev_addr = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
-                  value_type>{buf_ptr, reg_read , reg_write, dev_addr} {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_TCA6424)
+                  value_type>{buf_ptr, reg_read, reg_write, dev_addr} {
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
   }
   ~tca6424() noexcept {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_TCA6424)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
   }
@@ -74,31 +74,31 @@ class tca6424 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return get_name(_chip_name, get_num());
   }
   void configure_port(const tca6424_port_data &data) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_TCA6424)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     write(0x0c + static_cast<int>(data.port), data.value);
   }
-  void configure_port(const tca6424_port_data &data, error_type &error) const
-      noexcept {
+  void configure_port(const tca6424_port_data &data,
+                      error_type &error) const noexcept {
     helpers::noexcept_set_function<tca6424, error_type, NoerrorValue,
                                    tca6424_port_data, &tca6424::configure_port>(
         this, data, error);
   }
   void set_port(const tca6424_port_data &data) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_TCA6424)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     write(0x04 + static_cast<int>(data.port), data.value);
   }
-  void set_port(const tca6424_port_data &data, error_type &error) const
-      noexcept {
+  void set_port(const tca6424_port_data &data,
+                error_type &error) const noexcept {
     helpers::noexcept_set_function<tca6424, error_type, NoerrorValue,
                                    tca6424_port_data, &tca6424::set_port>(
         this, data, error);
   }
   void get_port(tca6424_port_data &data) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_TCA6424)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     read(0x04 + static_cast<int>(data.port), data.value);

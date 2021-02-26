@@ -31,5 +31,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "chappi_ina219.h"
 #include "chappi_lmx2594.h"
 #include "chappi_ltc2991.h"
+#include "chappi_ltc6953.h"
 #include "chappi_si57x.h"
 #include "chappi_tca6424.h"

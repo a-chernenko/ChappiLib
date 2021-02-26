@@ -71,13 +71,13 @@ class ltc2991 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   ltc2991(std::streambuf *buf_ptr = {}, reg_read_fn reg_read = {},
           reg_write_fn reg_write = {}, dev_addr_type dev_addr = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
-                  value_type>{buf_ptr, reg_read , reg_write, dev_addr} {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LTC2991)
+                  value_type>{buf_ptr, reg_read, reg_write, dev_addr} {
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
   }
   ~ltc2991() noexcept {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LTC2991)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
   }
@@ -87,7 +87,7 @@ class ltc2991 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return get_name(_chip_name, get_num());
   }
   void enable_all_channels() const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LTC2991)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     value_type value{};
@@ -100,7 +100,7 @@ class ltc2991 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &ltc2991::enable_all_channels>(this, error);
   }
   void repeated_mode(bool enable) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LTC2991)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     value_type value{};
@@ -118,7 +118,7 @@ class ltc2991 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                             error);
   }
   void get_temperature(double &value) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LTC2991)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     value_type lsb{}, msb{};
@@ -137,7 +137,7 @@ class ltc2991 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
         this, error);
   }
   void get_voltage(ltc2991_channel_data &data) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LTC2991)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     _get_voltage(0x0A + (static_cast<int>(data.channel) << 1), data.value);
@@ -148,8 +148,8 @@ class ltc2991 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     get_voltage(data);
     return data.value;
   }
-  double get_voltage(ltc2991_channel channel, error_type &error) const
-      noexcept {
+  double get_voltage(ltc2991_channel channel,
+                     error_type &error) const noexcept {
     ltc2991_channel_data data{};
     data.channel = channel;
     helpers::noexcept_get_function<ltc2991, error_type, NoerrorValue,
@@ -158,7 +158,7 @@ class ltc2991 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return data.value;
   }
   void get_data(ltc2991_data &value) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_LTC2991)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     value.Tint = get_temperature();

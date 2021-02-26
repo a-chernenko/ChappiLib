@@ -87,13 +87,13 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   hmc987(std::streambuf *buf_ptr = {}, reg_read_fn reg_read = {},
          reg_write_fn reg_write = {}, dev_addr_type dev_addr = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
-                  value_type>{buf_ptr, reg_read , reg_write, dev_addr} {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_HMC987)
+                  value_type>{buf_ptr, reg_read, reg_write, dev_addr} {
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
   }
   ~hmc987() noexcept {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_HMC987)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
   }
@@ -103,7 +103,7 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return get_name(_chip_name, get_num());
   }
   void init() const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_HMC987)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     write(0x00, 0x00);
@@ -113,7 +113,7 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &hmc987::init>(this, error);
   }
   void read_id(value_type &id) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_HMC987)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     read(0x00, id);
@@ -129,7 +129,7 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                         error);
   }
   void chip_enable(bool enabled) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_HMC987)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     write(0x01, (enabled) ? 0x01 : 0x00);
@@ -139,7 +139,7 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &hmc987::chip_enable>(this, enabled, error);
   }
   void is_enabled(bool &enabled) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_HMC987)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     value_type value;
@@ -158,7 +158,7 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                      error);
   }
   void enable_buffers(hmc987_outputs::outs_bitmask bitmask) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_HMC987)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     write(0x02, static_cast<value_type>(bitmask));
@@ -171,7 +171,7 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                             error);
   }
   void state_buffers(hmc987_outputs::outs_bitmask &bitmask) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_HMC987)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     value_type value;
@@ -190,7 +190,7 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                           &hmc987::state_buffers>(this, error);
   }
   void set_gain(hmc987_gain gain) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_HMC987)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     write(0x04, static_cast<value_type>(gain) & 0x07);
@@ -201,7 +201,7 @@ class hmc987 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                                                    error);
   }
   void get_gain(hmc987_gain &gain) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_HMC987)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     value_type value;

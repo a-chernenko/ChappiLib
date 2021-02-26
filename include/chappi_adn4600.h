@@ -56,13 +56,13 @@ class adn4600 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   adn4600(std::streambuf *buf_ptr = {}, reg_read_fn reg_read = {},
           reg_write_fn reg_write = {}, dev_addr_type dev_addr = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
-                  value_type>{buf_ptr, reg_read , reg_write, dev_addr} {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_ADN4600)
+                  value_type>{buf_ptr, reg_read, reg_write, dev_addr} {
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
   }
   ~adn4600() noexcept {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_ADN4600)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
   }
@@ -72,7 +72,7 @@ class adn4600 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return get_name(_chip_name, get_num());
   }
   void reset() const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_ADN4600)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     write(0x00, 0x01);
@@ -82,21 +82,21 @@ class adn4600 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &adn4600::reset>(this, error);
   }
   void xpt_config(const adn4600_xpt_data &data) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_ADN4600)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     const auto value =
         value_type(((data.input << 4) & 0x70) | (data.output & 0x07));
     write(0x40, value);
   }
-  void xpt_config(const adn4600_xpt_data &data, error_type &error) const
-      noexcept {
+  void xpt_config(const adn4600_xpt_data &data,
+                  error_type &error) const noexcept {
     helpers::noexcept_set_function<adn4600, error_type, NoerrorValue,
                                    adn4600_xpt_data, &adn4600::xpt_config>(
         this, data, error);
   }
   void xpt_update() const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_ADN4600)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     write(0x41, 0x01);

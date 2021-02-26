@@ -33,9 +33,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "chappi_except.h"
 
-#if __cplusplus < 201402L
+#if __cplusplus < 201103L
 #error \
-    "This file requires compiler and library support for the ISO C++ 2014 standard or later."
+    "This file requires compiler and library support for the ISO C++ 2011 standard or later."
 #endif
 
 namespace chappi {
@@ -47,7 +47,8 @@ class logstream {
  public:
   logstream(bool log_enable)
       : logstream{(log_enable) ? std::clog.rdbuf() : nullptr} {}
-  logstream(std::streambuf *buf_ptr = {}) : _log{buf_ptr} {}
+  logstream(std::streambuf *buf_ptr = {})
+      : _log{std::make_shared<std::ostream>(buf_ptr)} {}
   ~logstream() noexcept = default;
   template <typename Type>
   logstream &operator<<(Type &&rhs) {
@@ -251,12 +252,12 @@ class chip_base {
     if (error != no_error_value)
       throw runtime_error<error_type>(error, error_msg);
   }
-  void write(addr_type addr, value_type value, error_type &error) const
-      noexcept {
+  void write(addr_type addr, value_type value,
+             error_type &error) const noexcept {
     error = _reg_write(_dev_addr, addr, value);
   }
-  void read(addr_type addr, value_type &value, error_type &error) const
-      noexcept {
+  void read(addr_type addr, value_type &value,
+            error_type &error) const noexcept {
     error = _reg_read(_dev_addr, addr, value);
   }
   void setup_io(const reg_read_fn &reg_read, const reg_write_fn &reg_write,

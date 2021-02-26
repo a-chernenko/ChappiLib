@@ -60,13 +60,13 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
   si57x(std::streambuf *buf_ptr = {}, reg_read_fn reg_read = {},
         reg_write_fn reg_write = {}, dev_addr_type dev_addr = {})
       : chip_base<error_type, NoerrorValue, dev_addr_type, addr_type,
-                  value_type>{buf_ptr, reg_read , reg_write, dev_addr} {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
+                  value_type>{buf_ptr, reg_read, reg_write, dev_addr} {
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
   }
   ~si57x() noexcept {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
   }
@@ -76,7 +76,7 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     return get_name(_chip_name, get_num());
   }
   void reset() const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     write(135, 0x80);
@@ -86,7 +86,7 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &si57x::reset>(this, error);
   }
   void freeze_dco(bool enabled) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     write(137, (enabled) ? 0x10 : 0x00);
@@ -96,7 +96,7 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &si57x::freeze_dco>(this, enabled, error);
   }
   void apply_freq() const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     write(135, 0x40);
@@ -106,7 +106,7 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                     &si57x::apply_freq>(this, error);
   }
   void set_freq(double value) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     freq_regs_type freq_regs{};
@@ -126,7 +126,7 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
                                    &si57x::set_freq>(this, value, error);
   }
   void get_freq(double &value) const {
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
+#if defined(CHAPPI_LOG_ENABLE)
     log_info(__func__);
 #endif
     freq_regs_type freq_regs{};
@@ -157,7 +157,7 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
       ++addr;
     }
     _fxtal = _calculate_fxtal(freq_gen, freq_regs);
-#if defined(CHAPPI_LOG_ENABLE) && defined(CHAPPI_LOG_ENABLE_Si57x)
+#if defined(CHAPPI_LOG_ENABLE)
     log << '[' << get_name() << ']' << " Fxtal = " << std::setprecision(12)
         << _fxtal << '\n';
 #endif
@@ -190,8 +190,8 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     fxtal *= hs_div_tmp * n1_tmp;
     return fxtal;
   }
-  bool _make_freq_regs(double freq, double fxtal, freq_regs_type &reg) const
-      noexcept {
+  bool _make_freq_regs(double freq, double fxtal,
+                       freq_regs_type &reg) const noexcept {
     if (freq < 10000000.0) {
       freq = 10000000.0;
     }
