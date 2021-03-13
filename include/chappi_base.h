@@ -125,7 +125,7 @@ void noexcept_void_function(const ClassType *const _this,
 }  // namespace helpers
 
 template <typename ClassType>
-class chips_counter final {
+class chips_counter  {
 #if __cplusplus < 201703L
   static int _counts;
 #else

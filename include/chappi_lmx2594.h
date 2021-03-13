@@ -90,11 +90,6 @@ namespace lmx2594_registers {
 
 using register_type = uint16_t;
 
-template <typename ValueType>
-constexpr register_type register_to_integer(ValueType value) noexcept {
-  return static_cast<std::underlying_type_t<ValueType>>(value);
-}
-
 template <typename register_bits_type>
 union register_basic {
   register_type reg{};
@@ -1325,9 +1320,7 @@ using lmx2594_lock_detect_mux = lmx2594_registers::MUXOUT_LD_SEL_type;
 using lmx2594_mash_order = lmx2594_registers::MASH_ORDER_type;
 
 namespace detail {
-struct lmx2594_counter {
-  chips_counter<lmx2594_counter> data;
-};
+struct lmx2594_counter : chips_counter<lmx2594_counter> {};
 }  // namespace detail
 
 template <typename ErrorType = int, ErrorType NoerrorValue = 0,
@@ -1360,8 +1353,8 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     log_info(__func__);
 #endif
   }
-  int get_num() const noexcept final { return _counter.data.get_num(); }
-  int get_counts() const noexcept final { return _counter.data.get_counts(); }
+  int get_num() const noexcept final { return _counter.get_num(); }
+  int get_counts() const noexcept final { return _counter.get_counts(); }
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
   }
@@ -2096,8 +2089,11 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           "lmx2594::set_frequency: osc_frequency out of range");
     }
     double osc_frequency_ratio =
-        register_to_integer(_registers_map.regs.reg_R10.bits.MULT) *
-        (register_to_integer(_registers_map.regs.reg_R9.bits.OSC_2X) + 1) /
+        register_to_integer<register_type>(
+            _registers_map.regs.reg_R10.bits.MULT) *
+        (register_to_integer<register_type>(
+             _registers_map.regs.reg_R9.bits.OSC_2X) +
+         1) /
         double(_registers_map.regs.reg_R11.bits.PLL_R) /
         double(_registers_map.regs.reg_R12.bits.PLL_R_PRE);
     double pd_frequency = osc_frequency * osc_frequency_ratio;
@@ -2142,6 +2138,12 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     set_fractional_numerator(numerator);
     set_fractional_denomerator(denomerator);
     set_output_mux(lmx2594_output_a_mux::chdiv);
+    if (data.output == lmx2594_output::outa) {
+      set_output_mux(lmx2594_output_a_mux::chdiv);
+    }
+    if (data.output == lmx2594_output::outb) {
+      set_output_mux(lmx2594_output_b_mux::chdiv);
+    }
     set_phase_detector_delay(vco_frequency);
     set_high_pd_frequency_calibration(uint32_t(pd_frequency));
     set_low_pd_frequency_calibration(uint32_t(pd_frequency));
@@ -2349,7 +2351,8 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
       divider = CAL_CLK_DIV_type::div2;
     }
     const double smclk_frequency =
-        osc_frequency / std::pow(2, register_to_integer(divider));
+        osc_frequency /
+        std::pow(2, register_to_integer<register_type>(divider));
     _registers_map.regs.reg_R4.bits.ACAL_CMP_DLY =
         register_type(std::ceil(smclk_frequency / 10000000.)) + 1;
   }

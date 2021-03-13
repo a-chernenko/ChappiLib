@@ -25,9 +25,59 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include <cstdint>
 #include <forward_list>
 
 namespace chappi {
+
+#pragma pack(push, 1)
+
+struct register_8bits {
+  const uint8_t D0 : 1;
+  const uint8_t D1 : 1;
+  const uint8_t D2 : 1;
+  const uint8_t D3 : 1;
+  const uint8_t D4 : 1;
+  const uint8_t D5 : 1;
+  const uint8_t D6 : 1;
+  const uint8_t D7 : 1;
+};
+
+struct register_16bits {
+  const uint16_t D0 : 1;
+  const uint16_t D1 : 1;
+  const uint16_t D2 : 1;
+  const uint16_t D3 : 1;
+  const uint16_t D4 : 1;
+  const uint16_t D5 : 1;
+  const uint16_t D6 : 1;
+  const uint16_t D7 : 1;
+  const uint16_t D8 : 1;
+  const uint16_t D9 : 1;
+  const uint16_t D10 : 1;
+  const uint16_t D11 : 1;
+  const uint16_t D12 : 1;
+  const uint16_t D13 : 1;
+  const uint16_t D14 : 1;
+  const uint16_t D15 : 1;
+};
+
+#pragma pack(pop)
+
+template <typename register_type, typename register_bits_type,
+          typename register_addr_type, register_addr_type register_addr>
+struct register_abstract {
+  union register_data_type {
+    register_type value{};
+    register_bits_type bits;
+  } data{};
+  const register_addr_type addr{register_addr};
+};
+
+template <typename register_type = std::size_t, typename value_type>
+constexpr register_type register_to_integer(value_type value) noexcept {
+  return static_cast<std::underlying_type_t<value_type>>(value);
+}
 
 template <std::size_t register_max_num>
 class registers_update {

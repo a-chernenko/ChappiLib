@@ -35,9 +35,7 @@ struct adn4600_xpt_data {
 };
 
 namespace detail {
-struct adn4600_counter {
-  chips_counter<adn4600_counter> data;
-};
+struct adn4600_counter : chips_counter<adn4600_counter> {};
 }  // namespace detail
 
 template <typename ErrorType = int, ErrorType NoerrorValue = 0,
@@ -66,8 +64,8 @@ class adn4600 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     log_info(__func__);
 #endif
   }
-  int get_num() const noexcept final { return _counter.data.get_num(); }
-  int get_counts() const noexcept final { return _counter.data.get_counts(); }
+  int get_num() const noexcept final { return _counter.get_num(); }
+  int get_counts() const noexcept final { return _counter.get_counts(); }
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
   }

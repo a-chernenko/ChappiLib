@@ -33,9 +33,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace chappi {
 
 namespace detail {
-struct si57x_counter {
-  chips_counter<si57x_counter> data;
-};
+struct si57x_counter : chips_counter<si57x_counter> {};
 }  // namespace detail
 
 template <typename ErrorType = int, ErrorType NoerrorValue = 0,
@@ -70,8 +68,8 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     log_info(__func__);
 #endif
   }
-  int get_num() const noexcept final { return _counter.data.get_num(); }
-  int get_counts() const noexcept final { return _counter.data.get_counts(); }
+  int get_num() const noexcept final { return _counter.get_num(); }
+  int get_counts() const noexcept final { return _counter.get_counts(); }
   std::string get_name() const noexcept final {
     return get_name(_chip_name, get_num());
   }
