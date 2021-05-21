@@ -1086,12 +1086,17 @@ class ltc6953 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
           std::to_string(register_to_integer(data.output)));
     }
     uint8_t MDx{};
-    uint8_t MPx{};
-    MDx = (data.divider - 1) / 32;
-    if (MDx > 7) {
-      MDx = 7;
+    const uint8_t MDx_max = 7;
+    const uint8_t MPx_steps = 32;
+    uint8_t pow2 = (data.divider - 1) / MPx_steps;
+    while (pow2 != 0) {
+      pow2 >>= 1;
+      ++MDx;
+      if (MDx == MDx_max) {
+        break;
+      }
     }
-    MPx = data.divider / (1 << MDx) - 1;
+    uint8_t MPx = data.divider / (1 << MDx) - 1;
     if (data.divider % (1 << MDx) != 0) {
       const auto factor{double(data.divider) / (1 << MDx)};
       uint16_t nearest_low = std::floor(factor) * (1 << MDx);
