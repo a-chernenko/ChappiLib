@@ -2102,11 +2102,19 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
       throw std::out_of_range(
           "lmx2594::set_frequency: pd_frequency out of range");
     }
-    const auto channel_divider =
-        get_channel_divider(out_frequency, uint64_t(pd_frequency));
-    set_channel_divider(channel_divider);
-    const uint32_t actual_channel_divider =
-        get_actual_channel_divider(channel_divider);
+    auto out_a_mux{OUTA_MUX_type::chdiv};
+    auto out_b_mux{OUTB_MUX_type::chdiv};
+    decltype(get_channel_divider({}, {})) channel_divider{};
+    decltype(get_actual_channel_divider({})) actual_channel_divider{};
+    try {
+      channel_divider = get_channel_divider(out_frequency, uint64_t(pd_frequency));
+      actual_channel_divider = get_actual_channel_divider(channel_divider);
+      set_channel_divider(channel_divider);
+    }catch(const std::out_of_range &e){
+      out_a_mux = OUTA_MUX_type::vco;
+      out_b_mux = OUTB_MUX_type::vco;
+      actual_channel_divider = 1;
+    }
     const uint64_t vco_frequency = out_frequency * actual_channel_divider;
     if (vco_frequency < lmx2594_constants::vco_frequency::min ||
         vco_frequency > get_vco_frequency_max()) {
@@ -2137,12 +2145,11 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     set_n_divider(n_divider);
     set_fractional_numerator(numerator);
     set_fractional_denomerator(denomerator);
-    set_output_mux(lmx2594_output_a_mux::chdiv);
     if (data.output == lmx2594_output::outa) {
-      set_output_mux(lmx2594_output_a_mux::chdiv);
+      set_output_mux(out_a_mux);
     }
     if (data.output == lmx2594_output::outb) {
-      set_output_mux(lmx2594_output_b_mux::chdiv);
+      set_output_mux(out_b_mux);
     }
     set_phase_detector_delay(vco_frequency);
     set_high_pd_frequency_calibration(uint32_t(pd_frequency));
@@ -2172,7 +2179,9 @@ class lmx2594 final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
     log_info("osc_frequency (Hz) = " + std::to_string(osc_frequency));
     log_info("vco_frequency (Hz) = " + std::to_string(vco_frequency));
     log_info("pd_frequency (Hz) = " + std::to_string(pd_frequency));
-    log_info("channel_divider = " + std::to_string(actual_channel_divider));
+    if(actual_channel_divider > 1){
+      log_info("channel_divider = " + std::to_string(actual_channel_divider));
+    }
     log_info("n_divider = " + std::to_string(n_divider));
     log_info("numerator = " + std::to_string(numerator));
     log_info("denomerator = " + std::to_string(denomerator));
