@@ -234,7 +234,7 @@ class si57x final : public chip_base<ErrorType, NoerrorValue, DevAddrType,
       double freq_tmp{};
       freq_dco = dco_max;
       for (int n1_count{1}; n1_count <= 128; ++n1_count) {
-        if (n1_count & 0x1) {
+        if (n1_count > 1 && n1_count & 0x1) {
           continue;
         }
         for (int hs_div_count{};
