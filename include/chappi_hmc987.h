@@ -55,6 +55,27 @@ union hmc987_outputs {
   } bits;
 #pragma pack(pop)
 };
+  
+inline constexpr auto hmc987_make_outs_bitmask(hmc987_outputs::outs_bitmask bitmask)
+{
+  return bitmask;
+}
+
+template <typename arg = hmc987_outputs::outs_bitmask, typename... args>
+constexpr auto hmc987_make_outs_bitmask(arg bitmask_arg, args... bitmask_args)
+{
+  std::underlying_type<hmc987_outputs::outs_bitmask>::type bitmask_init {};
+  bitmask_init |= std::underlying_type<hmc987_outputs::outs_bitmask>::type(bitmask_arg);
+  return hmc987_make_outs_bitmask(static_cast<hmc987_outputs::outs_bitmask>(bitmask_init), bitmask_args...);
+}
+
+template <typename arg = hmc987_outputs::outs_bitmask, typename... args>
+constexpr auto hmc987_make_outs_bitmask(arg bitmask, arg bitmask_arg, args... bitmask_args)
+{
+  auto bitmask_init = std::underlying_type<hmc987_outputs::outs_bitmask>::type(bitmask);
+  bitmask_init |= std::underlying_type<hmc987_outputs::outs_bitmask>::type(bitmask_arg);
+  return hmc987_make_outs_bitmask(static_cast<hmc987_outputs::outs_bitmask>(bitmask_init), bitmask_args...);
+}
 
 enum class hmc987_gain : uint8_t {
   Disable = 0,
