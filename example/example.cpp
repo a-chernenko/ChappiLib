@@ -33,6 +33,7 @@ using ltc2991_type = chappi::ltc2991<error_type, no_error_v>;
 using ina219_type = chappi::ina219<error_type, no_error_v>;
 using adn4600_type = chappi::adn4600<error_type, no_error_v>;
 using hmc987_type = chappi::hmc987<error_type, no_error_v>;
+using hmc988_type = chappi::hmc988<error_type, no_error_v>;
 using tca6424_type = chappi::tca6424<error_type, no_error_v>;
 using ad5621_type = chappi::ad5621<error_type, no_error_v>;
 using si57x_type = chappi::si57x<error_type, no_error_v>;
@@ -67,6 +68,7 @@ int main(int argc, char *argv[]) try {
   ina219_type ina219{true};
   adn4600_type adn4600{true};
   hmc987_type hmc987{true};
+  hmc988_type hmc988{true};
   tca6424_type tca6424{true};
   ad5621_type ad5621{true};
   si57x_type si57x{true};
