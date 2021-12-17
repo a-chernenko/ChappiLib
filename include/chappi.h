@@ -28,6 +28,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "chappi_ad5621.h"
 #include "chappi_adn4600.h"
 #include "chappi_hmc987.h"
+#include "chappi_hmc988.h"
 #include "chappi_ina219.h"
 #include "chappi_lmx2594.h"
 #include "chappi_ltc2991.h"
