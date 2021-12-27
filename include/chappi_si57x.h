@@ -118,13 +118,11 @@ public:
             ++addr;
         }
     }
-    void
-    set_freq(double value, error_type& error) const noexcept
+    void set_freq(double value, error_type& error) const noexcept
     {
         helpers::noexcept_set_function<si57x, error_type, NoerrorValue, double, &si57x::set_freq>(this, value, error);
     }
-    void
-    get_freq(double& value) const
+    void get_freq(double& value) const
     {
 #if defined(CHAPPI_LOG_ENABLE)
         log_info(__func__);
@@ -141,19 +139,15 @@ public:
     {
         return helpers::noexcept_get_function<si57x, error_type, NoerrorValue, double, &si57x::get_freq>(this, error);
     }
-    double
-    get_freq() const
+    double get_freq() const
     {
         double value {};
         get_freq(value);
         return value;
     }
-    void
-    set_fxtal(double fxtal) noexcept { _fxtal = fxtal; }
-    double
-    get_fxtal() const noexcept { return _fxtal; }
-    void
-    calib_fxtal(double freq_gen) noexcept
+    void set_fxtal(double fxtal) noexcept { _fxtal = fxtal; }
+    double get_fxtal() const noexcept { return _fxtal; }
+    void calib_fxtal(double freq_gen) noexcept
     {
         freq_regs_type freq_regs {};
         addr_type addr { start_addr };
