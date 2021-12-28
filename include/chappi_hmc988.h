@@ -103,7 +103,7 @@ namespace hmc988_registers {
 
     struct register_bits_03h {
         register_type : 4;
-        hmc988_tx_buffer_swing tx_buffer_swing_select : 4;
+        hmc988_tx_buffer_swing tx_buffer_swing_select : 2;
         register_type sync_delay_adj : 3;
     };
 
@@ -611,6 +611,9 @@ public:
     }
     void set_delay_line_setpoint(uint8_t setpoint) const
     {
+        if(setpoint > 60){
+            throw std::invalid_argument("hmc988::set_delay_line_setpoint: invalid argument");
+        }
         using namespace hmc988_registers;
 #if defined(CHAPPI_LOG_ENABLE)
         log_info(__func__);
