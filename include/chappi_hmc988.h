@@ -618,11 +618,7 @@ public:
 #if defined(CHAPPI_LOG_ENABLE)
         log_info(__func__);
 #endif
-        register_00h reg_00h {};
         register_07h reg_07h {};
-        reg_00h.data.bits.read_control = reg_07h.addr;
-        _write(reg_00h);
-        _read(reg_07h);
         reg_07h.data.bits.delay_line_setpoint = setpoint;
         _write(reg_07h);
     }
@@ -658,7 +654,7 @@ private:
     template <typename register_bits_type, hmc988_registers::register_addr_type register_addr>
     void _read(hmc988_registers::register_abstract<register_bits_type, register_addr>& reg) const
     {
-        read((reg.addr << _addr_offset) | get_dev_addr(), reg.data.value);
+        read(get_dev_addr(), reg.data.value);
     }
     template <typename register_bits_type, hmc988_registers::register_addr_type register_addr>
     void _write(const hmc988_registers::register_abstract<register_bits_type, register_addr>& reg) const
